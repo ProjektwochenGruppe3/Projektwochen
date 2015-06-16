@@ -36,29 +36,8 @@ namespace Editor
         {
             InitializeComponent();
 
-            drawMethod(9, "Komp. 1");
-            drawMethod(12, "Komp. 2");
-            drawMethod(1, "Komp. 3");
-
-
-            //Canvas methodCanvas = new Canvas();
-            //canvas.Children.Add(methodCanvas);
-            //methodCanvas.MouseDown += new MouseButtonEventHandler(MouseDownObject);
-
-            //Label label = new Label();
-            //label.Content = "Komponente 1";
-            //methodCanvas.Children.Add(label);
-            //Canvas.SetLeft(label, 0);
-            //Canvas.SetTop(label, 0);
-
-            //Rectangle test = new Rectangle();
-            //test.Height = 50;
-            //test.Width = 50;
-            //test.Stroke = new SolidColorBrush(Colors.Red);
-            //test.Fill = new SolidColorBrush(Colors.Gray);
-            //methodCanvas.Children.Add(test);
-            //Canvas.SetLeft(test, 20);
-            //Canvas.SetTop(test, 25);
+            drawMethod(3, "Komp. 1");
+            drawMethod(4, "Komp. 2");
         }
 
         private void MouseDownObject(object sender, MouseButtonEventArgs e)
@@ -80,6 +59,10 @@ namespace Editor
         private void canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
             SelectedMethod = null;
+            if (SelectedLine != null && SelectedLine.Parent != null)
+            {
+                (SelectedLine.Parent as Canvas).Children.Remove(SelectedLine);
+            }
         }
 
         private void canvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -126,8 +109,8 @@ namespace Editor
             dockPointOutput.Width = 10;
             dockPointOutput.Stroke = new SolidColorBrush(Colors.Brown);
             dockPointOutput.Fill = new SolidColorBrush(Colors.LightBlue);
-            dockPointOutput.MouseDown += dockPointOutput_MouseDown;
-            dockPointOutput.MouseUp += dockPointOutput_MouseUp;
+            dockPointOutput.MouseDown += dockPoint_MouseDown;
+            dockPointOutput.MouseUp += dockPoint_MouseUp;
             newMethod.Children.Add(dockPointOutput);
             Canvas.SetLeft(dockPointOutput, boxLeftPosition + methodBox.Width + 20 - 5);
             Canvas.SetTop(dockPointOutput, methodBox.Height / 2 + boxTopPosition - 5);
@@ -149,6 +132,8 @@ namespace Editor
                 dockPointInput.Width = 10;
                 dockPointInput.Stroke = new SolidColorBrush(Colors.Brown);
                 dockPointInput.Fill = new SolidColorBrush(Colors.LightBlue);
+                dockPointInput.MouseDown += dockPoint_MouseDown;
+                dockPointInput.MouseUp += dockPoint_MouseUp;
                 newMethod.Children.Add(dockPointInput);
                 Canvas.SetLeft(dockPointInput, boxLeftPosition - 20 - 5);
                 Canvas.SetTop(dockPointInput, j - 5);
@@ -156,11 +141,17 @@ namespace Editor
             }
         }
 
-        private void dockPointOutput_MouseUp(object sender, MouseButtonEventArgs e)
+        private void dockPoint_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (SelectedLine != null)
             {
                 var dockPoint = sender as Ellipse;
+
+                if (dockPoint.Tag != null)
+                {
+                    ((dockPoint.Parent as Canvas).Parent as Canvas).Children.Remove(((LineHelper)dockPoint.Tag).dockLine);
+                }
+
                 var p = dockPoint.TranslatePoint(new Point(0, 0), canvas);
                 SelectedLine.X2 = p.X + 5;
                 SelectedLine.Y2 = p.Y + 5;
@@ -173,13 +164,19 @@ namespace Editor
             }
         }
 
-        private void dockPointOutput_MouseDown(object sender, MouseButtonEventArgs e)
+        private void dockPoint_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed && e.RightButton != MouseButtonState.Pressed)
             {
                 SelectedLine = new Line();
                 SelectedLine.Stroke = new SolidColorBrush(Colors.Black);
+
                 var dockPoint = sender as Ellipse;
+                if (dockPoint.Tag != null)
+                {
+                    ((dockPoint.Parent as Canvas).Parent as Canvas).Children.Remove(((LineHelper)dockPoint.Tag).dockLine);
+                }
+
                 var p = dockPoint.TranslatePoint(new Point(0, 0), canvas);
                 SelectedLine.X1 = p.X + 5;
                 SelectedLine.Y1 = p.Y + 5;
@@ -205,7 +202,7 @@ namespace Editor
                     Canvas.SetTop(SelectedMethod, e.GetPosition(canvas).Y - MousePosition.Y);
                     Canvas.SetLeft(SelectedMethod, e.GetPosition(canvas).X - MousePosition.X);
 
-                    foreach (var item in ((Canvas)sender).Children)
+                    foreach (var item in SelectedMethod.Children)
                     {
                         if (item is Ellipse)
                         {
@@ -218,13 +215,13 @@ namespace Editor
 
                                 if (dockHelper.IsEnd == true)
                                 {
-                                    dockHelper.dockLine.X2 = p.X;
-                                    dockHelper.dockLine.Y2 = p.Y;
+                                    dockHelper.dockLine.X2 = p.X + 5;
+                                    dockHelper.dockLine.Y2 = p.Y + 5;
                                 }
                                 else
                                 {
-                                    dockHelper.dockLine.X1 = p.X;
-                                    dockHelper.dockLine.Y1 = p.Y;
+                                    dockHelper.dockLine.X1 = p.X + 5;
+                                    dockHelper.dockLine.Y1 = p.Y + 5;
                                 }
                             }
                         }
@@ -241,7 +238,5 @@ namespace Editor
             }
 
         }
-
-
     }
 }
