@@ -5,9 +5,9 @@ VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor", "Editor\Editor.csproj", "{38F3C879-6B62-49DA-A737-28E9D5C7EEF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerAgent_PW_Josef_Benda_V1", "ServerAgent\ServerAgent_PW_Josef_Benda_V1.csproj", "{A53BD86D-FD7D-458F-A90A-09562298C8A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerAgent", "ServerAgent\ServerAgent.csproj", "{A53BD86D-FD7D-458F-A90A-09562298C8A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientAgent_PW_Cerima_Koini_V1", "ClientAgent\ClientAgent_PW_Cerima_Koini_V1.csproj", "{1D7D93EA-F5DA-497B-B1E7-0A522A5E193A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientAgent", "ClientAgent\ClientAgent.csproj", "{1D7D93EA-F5DA-497B-B1E7-0A522A5E193A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
