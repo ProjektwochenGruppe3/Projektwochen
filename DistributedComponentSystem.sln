@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor", "Editor\Editor.csproj", "{38F3C879-6B62-49DA-A737-28E9D5C7EEF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerAgent_PW_Josef_Benda_V1", "ServerAgent\ServerAgent_PW_Josef_Benda_V1.csproj", "{A53BD86D-FD7D-458F-A90A-09562298C8A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{38F3C879-6B62-49DA-A737-28E9D5C7EEF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38F3C879-6B62-49DA-A737-28E9D5C7EEF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38F3C879-6B62-49DA-A737-28E9D5C7EEF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A53BD86D-FD7D-458F-A90A-09562298C8A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A53BD86D-FD7D-458F-A90A-09562298C8A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A53BD86D-FD7D-458F-A90A-09562298C8A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A53BD86D-FD7D-458F-A90A-09562298C8A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
