@@ -13,7 +13,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             Server server = new Server();
             server.StartServer();
             Console.ReadKey();
-            server.Broadcast("Hallo ich bin euer Server!");
+            server.Broadcast("Hi ich bin euer Server!");
             Console.ReadKey();
             server.StopServer();
         }
