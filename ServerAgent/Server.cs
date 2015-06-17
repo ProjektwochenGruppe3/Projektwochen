@@ -6,6 +6,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
+using dcs.core;
 
 namespace ServerAgent_PW_Josef_Benda_V1
 {
@@ -18,6 +20,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
         public List<Client> Clients { get; set; }
 
         public bool ServerAlive { get; set; }
+
+        public System.Timers.Timer KeepAliveTimer { get; set; }
 
         public void StartServer()
         {
@@ -40,11 +44,15 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.ServerAlive = false;
         }
 
-        public void BroadcastKeepAlive(string message)
+        public void BroadcastKeepAlive()
         {
-            foreach (Client c in Clients)
+            foreach (Client c in this.Clients)
             {
-                
+                Task t = Task.Factory.StartNew(
+                    () =>
+                    { 
+
+                    });
             }
         }
 
@@ -101,6 +109,31 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
                 Thread.Sleep(50);
             }
+        }
+
+        private Guid SendKeepAliveRequest(Client c)
+        {
+            Guid g = Guid.NewGuid();
+            AgentKeepAliveRequest req = new AgentKeepAliveRequest(g);
+
+            Networking.SendPackage(g, c.ClientTcp.GetStream());
+
+            return g;
+        }
+
+        private bool RecieveKeepAliveResponse(Client c, Guid requestguid)
+        {
+            AgentKeepAliveResponse res = Networking.RecievePackage(c.ClientTcp.GetStream()) as AgentKeepAliveResponse;
+
+            if (res == null || res.KeepAliveRequestGuid != requestguid)
+            {
+                return false;
+            }
+
+            c.CpuLoad = res.CpuLoad;
+            c.FriendlyName = res.FriendlyName;
+
+            return true;
         }
     }
 }

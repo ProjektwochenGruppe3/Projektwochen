@@ -15,6 +15,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.ClientTcp = client;
             this.ClientThread = clientThread;
             this.ClientAlive = true;
+            this.CpuLoad = 0;
+            this.FriendlyName = string.Empty;
         }
 
         public bool SendDataToClient { get; set; }
@@ -24,5 +26,11 @@ namespace ServerAgent_PW_Josef_Benda_V1
         public TcpClient ClientTcp { get; set; }
 
         public bool ClientAlive { get; set; }
+
+        public int CpuLoad { get; set; }
+
+        public string FriendlyName { get; set; }
+
+        public Guid ClientGuid { get; set; }
     }
 }
