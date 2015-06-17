@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Network;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,6 +27,9 @@ namespace Editor
 
         public Line SelectedLine;
 
+        private List<Component> serverComponents;
+        private List<Component> usedComponents;
+        
         public struct LineHelper
         {
             public Line dockLine;
@@ -35,9 +39,33 @@ namespace Editor
         public MainWindow()
         {
             InitializeComponent();
-
+            serverComponents = new List<Component>();
             drawMethod(3, "Komp. 1");
             drawMethod(4, "Komp. 2");
+
+            for (int i = 0; i < 10; i++)
+            {
+                Label newLabel = new Label();
+                newLabel.Content = "Label: " + i;
+                //newLabel.MouseDown += newLabel_MouseDown;
+                componentView.Items.Add(newLabel);
+            }
+        }
+
+        private void newLabel_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var myLabel = (Label)sender;
+            MessageBox.Show(myLabel.Content.ToString());
+        }
+
+        private void ListViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var item = sender as ListViewItem;
+            if (item != null)
+            {
+                var Label = item.Content as Label;
+                usedComponents.Add(new Component() { FriendlyName = Label.Content.ToString()});
+            }
         }
 
         private void MouseDownObject(object sender, MouseButtonEventArgs e)
