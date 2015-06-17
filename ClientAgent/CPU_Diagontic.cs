@@ -11,7 +11,9 @@ namespace ClientAgent
     {
         public static int GetCPULoad()
         {
-            PerformanceCounter total_cpu = new PerformanceCounter()
+            PerformanceCounter total_cpu = new PerformanceCounter();
+            double d = Math.Round(total_cpu.NextValue());
+            return (int)d;
         }
     }
 }
