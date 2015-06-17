@@ -18,17 +18,27 @@ namespace ClientAgent
         {
             this.ipAdress = ip;
             this.port = inputPort;
+            this.MyGuid = new Guid();
+            this.Listener = new TcpListener(IPAddress.Any, 47474);
         }
 
         public Guid MyGuid { get; private set; }
 
         public TcpClient ClientTCP { get; private set; }
 
+        public TcpListener Listener { get; set; }
+
+        public bool ListenerActive { get; set; }
+
         private Thread ClientThread;
+
+        private Thread ListenerThread;
 
         private string ipAdress;
 
         private int port;
+
+        public List<AtomicJob> TaskList { get; set; }
 
         public bool SendDataAvailable { get; private set; }
 
@@ -76,10 +86,31 @@ namespace ClientAgent
             }
         }
 
-        public object GetObject(NetworkStream netStream)
+        public void ListenerWorker()
         {
-            object obj = new object();
-            return obj;
+            while (this.ListenerActive)
+            {
+                if (this.Listener.Pending())
+                {
+                    Thread DLL_Loading_Thread = new Thread(new ParameterizedThreadStart(DLL_Worker));
+                    DLL_Loading_Thread.Start(this.Listener.AcceptTcpClient());
+                }
+            }
+        }
+
+        public void DLL_Worker(object serverRaw)
+        {
+            TcpClient server = (TcpClient)serverRaw;
+            NetworkStream dllStream = server.GetStream();
+            while (this.Waiting)
+            {
+                if (dllStream.DataAvailable)
+                {
+                    object data = Networking.RecievePackage(dllStream);
+                    AtomicJob job = new AtomicJob(ComponentExecuter.GetAssembly(data));
+                    this.TaskList.Add(job);
+                }
+            }
         }
 
         public void Connect()

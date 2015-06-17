@@ -44,27 +44,41 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.ServerAlive = false;
         }
 
-        public void BroadcastKeepAlive()
+        public async void BroadcastKeepAlive()
         {
+            List<Task> tasks = new List<Task>();
+
             foreach (Client c in this.Clients)
             {
-                Task t = Task.Factory.StartNew(
-                    () =>
-                    { 
-
-                    });
+                tasks.Add(this.KeepAliveWorker(c));
             }
-        }
 
-        public void SendToAllOtherClients(Client client, string message)
-        {
-            foreach (Client c in Clients)
+            foreach (var item in tasks)
             {
-                if (c != client)
+                try
                 {
+                    await item;
                 }
+                catch
+                {
+                }                
+            }
+
+            foreach (var item in this.Clients.Where(x => x.ClientAlive == false))
+            {
+                this.Clients.Remove(item);
             }
         }
+
+        //public void SendToAllOtherClients(Client client, string message)
+        //{
+        //    foreach (Client c in Clients)
+        //    {
+        //        if (c != client)
+        //        {
+        //        }
+        //    }
+        //}
 
         public void ListenerWorker()
         {
@@ -75,9 +89,13 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     TcpClient tmpClient = this.Listener.AcceptTcpClient();
                     Thread tmpClientThread = new Thread(new ParameterizedThreadStart(ClientWorker));
                     Client client = new Client(tmpClient, tmpClientThread);
-                    this.Clients.Add(client);
                     client.ClientThread.Start(client);
                     Console.WriteLine("A Client has connected!");
+
+                    if (this.EvaluateKeepAlive(client))
+                    {
+                        this.Clients.Add(client);
+                    }
                 }
 
                 Thread.Sleep(50);
@@ -88,27 +106,43 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             Client client = (Client)args;
             NetworkStream netStream = client.ClientTcp.GetStream();
-            byte[] receiveBuffer = new byte[500];
-            byte[] sendBuffer = new byte[500];
 
-            while(client.ClientAlive)
+            while (client.SendDataToClient)
             {
                 if (netStream.DataAvailable)
                 {
-                    int readLength = netStream.Read(receiveBuffer, 0, receiveBuffer.Length);
-                    string message = Encoding.UTF8.GetString(receiveBuffer, 0, readLength);
-                    this.SendToAllOtherClients(client, message);
-                    Console.WriteLine(message);
+                    
                 }
+
                 if (client.SendDataToClient)
                 {
                     sendBuffer = Encoding.UTF8.GetBytes(client.MessageToClient);
-                    netStream.Write(sendBuffer,0,sendBuffer.Length);
+                    netStream.Write(sendBuffer, 0, sendBuffer.Length);
                     client.SendDataToClient = false;
                 }
 
                 Thread.Sleep(50);
             }
+        }
+
+        private async Task KeepAliveWorker(Client c)
+        {
+            await Task.Run(() => this.EvaluateKeepAlive(c));
+        }
+
+        private bool EvaluateKeepAlive(Client c)
+        {
+            Guid requestguid = this.SendKeepAliveRequest(c);
+
+            bool success = this.RecieveKeepAliveResponse(c, requestguid);
+
+            if (!success)
+            {
+                c.ClientAlive = false;
+                return false;
+            }
+
+            return true;
         }
 
         private Guid SendKeepAliveRequest(Client c)
@@ -123,7 +157,21 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         private bool RecieveKeepAliveResponse(Client c, Guid requestguid)
         {
-            AgentKeepAliveResponse res = Networking.RecievePackage(c.ClientTcp.GetStream()) as AgentKeepAliveResponse;
+            NetworkStream ns = c.ClientTcp.GetStream();
+            AgentKeepAliveResponse res = null;
+
+            int timer = 0;
+
+            while (timer < 5000)
+            {
+                if (ns.DataAvailable)
+                {
+                    res = Networking.RecievePackage(ns) as AgentKeepAliveResponse;
+                }
+
+                timer += 50;
+                Thread.Sleep(50);
+            }
 
             if (res == null || res.KeepAliveRequestGuid != requestguid)
             {
