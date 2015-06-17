@@ -48,7 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
-    <Compile Include="ClientParser.cs" />
     <Compile Include="ClientState.cs" />
     <Compile Include="ComponentExecuter.cs" />
     <Compile Include="CPU_Diagontic.cs" />
