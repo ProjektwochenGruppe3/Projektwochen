@@ -4,14 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+using Core.Component;
 
 namespace ClientAgent
 {
-    class Executer
+    public static class ComponentExecuter
     {
-        public void GetMethod()
+        public static IEnumerable<object> InvokeMethod(object dll, IEnumerable<object> values)
         {
-            
+            Type objectType = dll.GetType();
+            Assembly executionable = Assembly.GetAssembly(objectType);
+            IComponent tmpClass = (IComponent)executionable;
+            IEnumerable<object> result = tmpClass.Evaluate(values);
+            return result;
         }
     }
 }

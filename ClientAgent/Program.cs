@@ -10,8 +10,7 @@ namespace ClientAgent
     {
         static void Main(string[] args)
         {
-            Client c = new Client();
-            Console.ReadKey();
+            Client c = new Client(args[0],int.Parse(args[1]));
         }
     }
 }
