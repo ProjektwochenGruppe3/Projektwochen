@@ -113,7 +113,7 @@ namespace ClientAgent
             }
             else
             {
-                Console.WriteLine("Error while first connect to server!");
+                Console.WriteLine("Error: Failed to connect to server!");
             }
         }
 
