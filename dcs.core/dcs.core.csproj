@@ -39,6 +39,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AgentKeepAliveRequest.cs" />
+    <Compile Include="AgentKeepAliveResponse.cs" />
     <Compile Include="Networking.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
