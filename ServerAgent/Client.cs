@@ -19,8 +19,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         public bool SendDataToClient { get; set; }
 
-        public string MessageToClient { get; set; }
-
         public Thread ClientThread { get; set; }
 
         public TcpClient ClientTcp { get; set; }

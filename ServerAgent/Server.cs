@@ -23,7 +23,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             this.Clients = new List<Client>();
             this.ServerAlive = true;
-            this.Listener = new TcpListener(IPAddress.Any, 1337);
+            this.Listener = new TcpListener(IPAddress.Any, 13370);
             this.Listener.Start();
             this.listenerThread = new Thread(new ThreadStart(ListenerWorker));
             this.listenerThread.Start();
@@ -40,12 +40,11 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.ServerAlive = false;
         }
 
-        public void Broadcast(string message)
+        public void BroadcastKeepAlive(string message)
         {
             foreach (Client c in Clients)
             {
-                c.MessageToClient = message;
-                c.SendDataToClient = true;
+                
             }
         }
 
@@ -55,8 +54,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
             {
                 if (c != client)
                 {
-                    c.MessageToClient = message;
-                    c.SendDataToClient = true;
                 }
             }
         }
@@ -74,6 +71,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     client.ClientThread.Start(client);
                     Console.WriteLine("A Client has connected!");
                 }
+
                 Thread.Sleep(50);
             }
         }
@@ -84,6 +82,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             NetworkStream netStream = client.ClientTcp.GetStream();
             byte[] receiveBuffer = new byte[500];
             byte[] sendBuffer = new byte[500];
+
             while(client.ClientAlive)
             {
                 if (netStream.DataAvailable)
@@ -99,6 +98,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     netStream.Write(sendBuffer,0,sendBuffer.Length);
                     client.SendDataToClient = false;
                 }
+
                 Thread.Sleep(50);
             }
         }
