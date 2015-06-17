@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor", "Editor\Editor.csproj", "{38F3C879-6B62-49DA-A737-28E9D5C7EEF2}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sub", "Sub\Sub.csproj", "{7EC28439-CE8E-4460-AEA0-26C0C8BEBA7A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReplaceWord", "ReplaceWord\ReplaceWord.csproj", "{B2428FF0-5704-463E-B499-358544EDCB4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorNetwork", "EditorNetwork\EditorNetwork.csproj", "{172FA02C-EB94-4D1F-A0B2-04C395774DBB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{B2428FF0-5704-463E-B499-358544EDCB4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2428FF0-5704-463E-B499-358544EDCB4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2428FF0-5704-463E-B499-358544EDCB4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{172FA02C-EB94-4D1F-A0B2-04C395774DBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{172FA02C-EB94-4D1F-A0B2-04C395774DBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{172FA02C-EB94-4D1F-A0B2-04C395774DBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{172FA02C-EB94-4D1F-A0B2-04C395774DBB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
