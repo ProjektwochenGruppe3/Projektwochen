@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace dcs.core
 {
-    class DummyClass
+    public static class Networking
     {
     }
 }
