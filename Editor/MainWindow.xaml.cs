@@ -29,7 +29,7 @@ namespace Editor
 
         private List<Component> serverComponents;
         private List<Component> usedComponents;
-        
+
         public struct LineHelper
         {
             public Line dockLine;
@@ -40,15 +40,32 @@ namespace Editor
         {
             InitializeComponent();
             serverComponents = new List<Component>();
-            drawMethod(3, "Komp. 1");
-            drawMethod(4, "Komp. 2");
+            usedComponents = new List<Component>();
 
-            for (int i = 0; i < 10; i++)
+            var testComponent = new Component();
+            testComponent.FriendlyName = "Test1";
+            testComponent.InputHints = new List<string>() { "string", "int", "double" };
+            testComponent.OutputHints = new List<string>() { "string"};
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Test2";
+            testComponent.InputHints = new List<string>() { "string", "int", "string"};
+            testComponent.OutputHints = new List<string>() { "string", "double" };
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Test2";
+            testComponent.InputHints = new List<string>() { "string", "int", "string" };
+            testComponent.OutputHints = new List<string>() { "string", "double", "bla", "lol" };
+            serverComponents.Add(testComponent);
+
+            foreach (var item in serverComponents)
             {
-                Label newLabel = new Label();
-                newLabel.Content = "Label: " + i;
-                //newLabel.MouseDown += newLabel_MouseDown;
-                componentView.Items.Add(newLabel);
+                Label componentLabel = new Label();
+                componentLabel.Content = item.FriendlyName;
+                componentLabel.Tag = item;
+                componentView.Items.Add(componentLabel);
             }
         }
 
@@ -64,7 +81,8 @@ namespace Editor
             if (item != null)
             {
                 var Label = item.Content as Label;
-                usedComponents.Add(new Component() { FriendlyName = Label.Content.ToString()});
+                var componentToAdd = Label.Tag as Component;
+                drawMethod(componentToAdd);
             }
         }
 
@@ -98,7 +116,7 @@ namespace Editor
 
         }
 
-        private void drawMethod(int inputCount, string name)
+        private void drawMethod(Component toAdd)
         {
             Canvas newMethod = new Canvas();
             newMethod.MouseDown += new MouseButtonEventHandler(MouseDownObject);
@@ -108,44 +126,69 @@ namespace Editor
             int boxLeftPosition = 25;
 
             Label methodLabel = new Label();
-            methodLabel.Content = name;
+            methodLabel.Content = toAdd.FriendlyName;
             methodLabel.Width = 60;
             newMethod.Children.Add(methodLabel);
             Canvas.SetLeft(methodLabel, boxLeftPosition);
             Canvas.SetTop(methodLabel, 0);
 
+            var outputCount = toAdd.OutputHints.Count();
+            var inputCount = toAdd.InputHints.Count();
+            int outputHeight = 0;
+            int inputHeight = 20;
+            int fullHeight = 0;
+
+            if (inputCount > outputCount)
+            {
+                inputHeight = 20;
+
+                fullHeight = (inputCount + 1) * inputHeight;
+                outputHeight = fullHeight / (outputCount + 1);
+            }
+            else
+            {
+                outputHeight = 20;
+                fullHeight = (outputCount + 1) * outputHeight;
+                inputHeight = fullHeight / (inputCount + 1);
+            }
+
             Rectangle methodBox = new Rectangle();
-            methodBox.Height = (inputCount + 1) * 20;
+            methodBox.Height = fullHeight;
             methodBox.Width = 50;
-            methodBox.Stroke = new SolidColorBrush(Colors.Red);
+            methodBox.Stroke = new SolidColorBrush(Colors.Black);
             methodBox.Fill = new SolidColorBrush(Colors.Gray);
             newMethod.Children.Add(methodBox);
             Canvas.SetLeft(methodBox, boxLeftPosition);
             Canvas.SetTop(methodBox, boxTopPosition);
 
-            Line outputLine = new Line();
-            outputLine.X1 = boxLeftPosition + methodBox.Width;
-            outputLine.X2 = boxLeftPosition + methodBox.Width + 20;
+            int k = boxTopPosition + outputHeight;
 
-            outputLine.Y1 = methodBox.Height / 2 + boxTopPosition;
-            outputLine.Y2 = methodBox.Height / 2 + boxTopPosition;
-            outputLine.Stroke = new SolidColorBrush(Colors.Black);
-            newMethod.Children.Add(outputLine);
+            for (int i = 0; i < toAdd.OutputHints.Count(); i++)
+            {
+                Line outputLine = new Line();
+                outputLine.X1 = boxLeftPosition + methodBox.Width;
+                outputLine.X2 = boxLeftPosition + methodBox.Width + 20;
+                outputLine.Y1 = k;
+                outputLine.Y2 = k;
+                outputLine.Stroke = new SolidColorBrush(Colors.Black);
+                newMethod.Children.Add(outputLine);
 
-            Ellipse dockPointOutput = new Ellipse();
-            dockPointOutput.Height = 10;
-            dockPointOutput.Width = 10;
-            dockPointOutput.Stroke = new SolidColorBrush(Colors.Brown);
-            dockPointOutput.Fill = new SolidColorBrush(Colors.LightBlue);
-            dockPointOutput.MouseDown += dockPoint_MouseDown;
-            dockPointOutput.MouseUp += dockPoint_MouseUp;
-            newMethod.Children.Add(dockPointOutput);
-            Canvas.SetLeft(dockPointOutput, boxLeftPosition + methodBox.Width + 20 - 5);
-            Canvas.SetTop(dockPointOutput, methodBox.Height / 2 + boxTopPosition - 5);
+                Ellipse dockPointOutput = new Ellipse();
+                dockPointOutput.Height = 10;
+                dockPointOutput.Width = 10;
+                dockPointOutput.Stroke = new SolidColorBrush(Colors.Brown);
+                dockPointOutput.Fill = new SolidColorBrush(Colors.LightBlue);
+                dockPointOutput.MouseDown += dockPoint_MouseDown;
+                dockPointOutput.MouseUp += dockPoint_MouseUp;
+                newMethod.Children.Add(dockPointOutput);
+                Canvas.SetLeft(dockPointOutput, boxLeftPosition + methodBox.Width + 20 - 5);
+                Canvas.SetTop(dockPointOutput, k - 5);
+                k = k + outputHeight;
+            }
 
-            int j = boxTopPosition + 20;
+            int j = boxTopPosition + inputHeight;
 
-            for (int i = 0; i < inputCount; i++)
+            for (int i = 0; i < toAdd.InputHints.Count(); i++)
             {
                 Line inputLine = new Line();
                 inputLine.X1 = boxLeftPosition - 20;
@@ -165,7 +208,7 @@ namespace Editor
                 newMethod.Children.Add(dockPointInput);
                 Canvas.SetLeft(dockPointInput, boxLeftPosition - 20 - 5);
                 Canvas.SetTop(dockPointInput, j - 5);
-                j = j + 20;
+                j = j + inputHeight;
             }
         }
 
@@ -218,8 +261,6 @@ namespace Editor
                 Canvas.SetZIndex(SelectedLine, -10);
             }
         }
-
-
 
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
