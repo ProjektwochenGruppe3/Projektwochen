@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace ClientAgent
 {
-    class Program
+    public static class CPU_Diagontic
     {
-        static void Main(string[] args)
+        public static int GetCPULoad()
         {
-            Client c = new Client();
-            Console.ReadKey();
+            PerformanceCounter total_cpu = new PerformanceCounter()
         }
     }
 }

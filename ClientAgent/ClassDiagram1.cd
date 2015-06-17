@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="ClientAgent_PW_Cerima_Koini_V1.Client" Collapsed="true">
+  <Class Name="ClientAgent.Client" Collapsed="true">
     <Position X="0.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAABAAAAAAQAAAAAAAAIAAAAAAAAQAAAEAAAAAAAQ=</HashCode>
+      <HashCode>AAAAAAAAAAACICAAAQAAIIAAAAAAAAwAAAEAZAAAAQg=</HashCode>
       <FileName>Client.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="ClientAgent_PW_Cerima_Koini_V1.Program" Collapsed="true">
+  <Class Name="ClientAgent.Program" Collapsed="true">
     <Position X="2.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
