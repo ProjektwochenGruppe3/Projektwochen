@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ClientAgent</RootNamespace>
-    <AssemblyName>ClientAgent_PW_Cerima_Koini_V1</AssemblyName>
+    <AssemblyName>ClientAgent_PW</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
