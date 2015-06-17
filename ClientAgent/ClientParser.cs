@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace ClientAgent
 {
-    class Program
+    public static class ClientParser
     {
-        static void Main(string[] args)
-        {
-            Client c = new Client();
-            Console.ReadKey();
-        }
+
     }
 }

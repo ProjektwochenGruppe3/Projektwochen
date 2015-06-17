@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace ClientAgent
 {
-    class Program
+    enum ClientState
     {
-        static void Main(string[] args)
-        {
-            Client c = new Client();
-            Console.ReadKey();
-        }
+        connecting = 0,
+        connected = 1
     }
 }

@@ -29,7 +29,7 @@ namespace ReplaceWord
             string oldVal;
             string newVal;
 
-            List<string> stringList = new List<string>();
+            List<object> stringList = new List<object>();
             stringList = values.ToList();
             sentence = (string)stringList[0];
             oldVal = (string)stringList[1];

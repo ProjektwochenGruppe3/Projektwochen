@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace ClientAgent
 {
-    class Program
+    class Executer
     {
-        static void Main(string[] args)
+        public void GetMethod()
         {
-            Client c = new Client();
-            Console.ReadKey();
+            
         }
     }
 }
