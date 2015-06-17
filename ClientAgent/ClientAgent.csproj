@@ -51,6 +51,7 @@
     <Compile Include="ClientState.cs" />
     <Compile Include="ComponentExecuter.cs" />
     <Compile Include="CPU_Diagontic.cs" />
+    <Compile Include="AtomicJob.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
