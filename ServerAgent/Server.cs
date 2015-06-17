@@ -106,22 +106,18 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             Client client = (Client)args;
             NetworkStream netStream = client.ClientTcp.GetStream();
-            byte[] receiveBuffer = new byte[500];
-            byte[] sendBuffer = new byte[500];
 
-            while(client.ClientAlive)
+            while (client.SendDataToClient)
             {
                 if (netStream.DataAvailable)
                 {
-                    int readLength = netStream.Read(receiveBuffer, 0, receiveBuffer.Length);
-                    string message = Encoding.UTF8.GetString(receiveBuffer, 0, readLength);
-                    this.SendToAllOtherClients(client, message);
-                    Console.WriteLine(message);
+                    
                 }
+
                 if (client.SendDataToClient)
                 {
                     sendBuffer = Encoding.UTF8.GetBytes(client.MessageToClient);
-                    netStream.Write(sendBuffer,0,sendBuffer.Length);
+                    netStream.Write(sendBuffer, 0, sendBuffer.Length);
                     client.SendDataToClient = false;
                 }
 
