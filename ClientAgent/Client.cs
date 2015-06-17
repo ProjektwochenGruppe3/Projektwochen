@@ -59,20 +59,31 @@ namespace ClientAgent
 
         public void FirstConnect()
         {
-            Console.WriteLine("Trying to connect...");
-            NetworkStream netStream = this.ClientTCP.GetStream();
             while (this.Waiting)
             {
-                if (netStream.DataAvailable)
+                Console.WriteLine("Trying to connect...");
+                try
                 {
-                    Console.WriteLine("Data available...");
-                    object receivedObj = Networking.RecievePackage(netStream);
-                    Console.WriteLine("Data received...");
-                    AgentKeepAliveRequest request = (AgentKeepAliveRequest)receivedObj;
-                    AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid,request.KeepAliveRequestGuid.ToString() + "_Agent",CPU_Diagontic.GetCPULoad());
-                    Networking.SendPackage(response, netStream);
-                    Console.WriteLine("Data sent...");
+                    this.ClientTCP.Connect(IPAddress.Parse(this.ipAdress), this.port);
+                    Console.WriteLine("Connected...");
+                    NetworkStream netStream = this.ClientTCP.GetStream();
+                    if (netStream.DataAvailable)
+                    {
+                        Console.WriteLine("Data available...");
+                        object receivedObj = Networking.RecievePackage(netStream);
+                        Console.WriteLine("Data received...");
+                        AgentKeepAliveRequest request = (AgentKeepAliveRequest)receivedObj;
+                        AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid,request.KeepAliveRequestGuid.ToString() + "_Agent",CPU_Diagontic.GetCPULoad());
+                        Networking.SendPackage(response, netStream);
+                        this.State = ClientState.connected;
+                        Console.WriteLine("Data sent...");
+                    }
                 }
+                catch
+                {
+                    Console.WriteLine("Unable to connect...");
+                }
+                Thread.Sleep(50);
             }
         }
 
@@ -86,10 +97,12 @@ namespace ClientAgent
         {
             this.Alive = true;
             this.ClientTCP = new TcpClient();
-            this.ClientTCP.Connect(IPAddress.Parse(this.ipAdress), this.port);
             this.State = ClientState.connecting;
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = 60000;
+            timer.Elapsed += TimerCallback;
+            timer.Start();
+            this.Waiting = true;
             this.ClientThread = new Thread(new ThreadStart(FirstConnect));
             this.ClientThread.Start();
             this.ClientThread.Join();
@@ -104,7 +117,7 @@ namespace ClientAgent
             }
         }
 
-        public void TimerCallback()
+        public void TimerCallback(object sender, ElapsedEventArgs e)
         {
             if (this.Waiting)
             {
