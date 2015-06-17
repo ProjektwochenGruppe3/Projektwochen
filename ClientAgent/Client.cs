@@ -59,15 +59,19 @@ namespace ClientAgent
 
         public void FirstConnect()
         {
+            Console.WriteLine("Trying to connect...");
             NetworkStream netStream = this.ClientTCP.GetStream();
             while (this.Waiting)
             {
                 if (netStream.DataAvailable)
                 {
+                    Console.WriteLine("Data available...");
                     object receivedObj = Networking.RecievePackage(netStream);
+                    Console.WriteLine("Data received...");
                     AgentKeepAliveRequest request = (AgentKeepAliveRequest)receivedObj;
                     AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid,request.KeepAliveRequestGuid.ToString() + "_Agent",CPU_Diagontic.GetCPULoad());
                     Networking.SendPackage(response, netStream);
+                    Console.WriteLine("Data sent...");
                 }
             }
         }

@@ -25,18 +25,18 @@ namespace ReplaceWord
 
         public IEnumerable<object> Evaluate(IEnumerable<object> values)
         {
-            string sentence;
+            string text;
             string oldVal;
             string newVal;
 
             List<object> stringList = new List<object>();
             stringList = values.ToList();
-            sentence = (string)stringList[0];
+            text = (string)stringList[0];
             oldVal = (string)stringList[1];
             newVal = (string)stringList[2];
 
             List<string> resultList = new List<string>();
-            resultList[0] = sentence.Replace(oldVal, newVal);
+            resultList[0] = text.Replace(oldVal, newVal);
             return resultList;
         }
 
