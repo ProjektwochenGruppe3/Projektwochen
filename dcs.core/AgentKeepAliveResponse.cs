@@ -8,7 +8,17 @@ namespace dcs.core
 {
     public class AgentKeepAliveResponse
     {
+        public AgentKeepAliveResponse(Guid requestguid, Guid agentguid, string friendlyname, int cpuload)
+        {
+            this.KeepAliveRequestGuid = requestguid;
+            this.AgentGuid = agentguid;
+            this.FriendlyName = friendlyname;
+            this.CpuLoad = cpuload;
+        }
+
         public Guid KeepAliveRequestGuid { get; private set; }
+
+        public Guid AgentGuid { get; private set; }
 
         public string FriendlyName { get; private set; }
 

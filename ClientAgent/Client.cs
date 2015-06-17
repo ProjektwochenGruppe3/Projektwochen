@@ -20,7 +20,9 @@ namespace ClientAgent
             this.port = inputPort;
         }
 
-        public TcpClient ClientTCP { get; set; }
+        public Guid MyGuid { get; private set; }
+
+        public TcpClient ClientTCP { get; private set; }
 
         private Thread ClientThread;
 
@@ -28,15 +30,15 @@ namespace ClientAgent
 
         private int port;
 
-        public bool SendDataAvailable { get; set; }
+        public bool SendDataAvailable { get; private set; }
 
-        public string Message { get; set; }
+        public string Message { get; private set; }
 
-        public bool Alive { get; set; }
+        public bool Alive { get; private set; }
 
-        public ClientState State { get; set; }
+        public ClientState State { get; private set; }
 
-        public bool Waiting { get; set; }
+        public bool Waiting { get; private set; }
 
         public void ClientWorker()
         {
@@ -64,7 +66,8 @@ namespace ClientAgent
                 {
                     object receivedObj = Networking.RecievePackage(netStream);
                     AgentKeepAliveRequest request = (AgentKeepAliveRequest)receivedObj;
-                    
+                    AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid,request.KeepAliveRequestGuid.ToString() + "_Agent",CPU_Diagontic.GetCPULoad());
+                    Networking.SendPackage(response, netStream);
                 }
             }
         }
