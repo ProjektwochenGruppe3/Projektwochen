@@ -13,7 +13,7 @@ namespace dcs.core
     {
         public static BinaryFormatter formatter = new BinaryFormatter();
 
-        public static bool SendPackage(object pack, NetworkStream stream)
+        public static void SendPackage(object pack, NetworkStream stream)
         {
             MemoryStream ms = new MemoryStream();
             formatter.Serialize(ms, pack);
@@ -27,20 +27,10 @@ namespace dcs.core
             Array.Copy(length, 0, fullData, 0, length.Length);
             Array.Copy(data, 0, fullData, length.Length, data.Length);
 
-            try
-            {
-                stream.Write(fullData, 0, fullData.Length);
-                stream.Flush();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return false;
-            }
+            stream.Write(fullData, 0, fullData.Length);
+            stream.Flush();
 
             ms.Close();
-
-            return true;
         }
 
         public static object RecievePackage(NetworkStream netstream)
