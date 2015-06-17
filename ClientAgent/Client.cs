@@ -18,13 +18,20 @@ namespace ClientAgent
         {
             this.ipAdress = ip;
             this.port = inputPort;
+            this.Listener = new TcpListener(IPAddress.Any, 47474);
         }
 
         public Guid MyGuid { get; private set; }
 
         public TcpClient ClientTCP { get; private set; }
 
+        public TcpListener Listener { get; set; }
+
+        public bool ListenerActive { get; set; }
+
         private Thread ClientThread;
+
+        private Thread ListenerThread;
 
         private string ipAdress;
 
@@ -74,6 +81,23 @@ namespace ClientAgent
                     Console.WriteLine("Data sent...");
                 }
             }
+        }
+
+        public void ListenerWorker()
+        {
+            while (this.ListenerActive)
+            {
+                if (this.Listener.Pending())
+                {
+                    Thread DLL_Loading_Thread = new Thread(new ParameterizedThreadStart(DLL_Worker);
+                    DLL_Loading_Thread.Start(this.Listener.AcceptTcpClient());
+                }
+            }
+        }
+
+        public void DLL_Worker(object server)
+        {
+
         }
 
         public object GetObject(NetworkStream netStream)
