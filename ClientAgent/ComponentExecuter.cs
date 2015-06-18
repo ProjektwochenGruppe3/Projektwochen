@@ -18,5 +18,12 @@ namespace ClientAgent
             IEnumerable<object> result = tmpClass.Evaluate(values);
             return result;
         }
+
+        public static Assembly GetAssembly(object dll)
+        {
+            Type objectType = dll.GetType();
+            Assembly asbly = Assembly.GetAssembly(objectType);
+            return asbly;
+        }
     }
 }
