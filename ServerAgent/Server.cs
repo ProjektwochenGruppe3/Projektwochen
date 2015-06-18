@@ -23,8 +23,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         public bool ServerAlive { get; set; }
 
-        //public System.Timers.Timer KeepAliveTimer { get; set; }
-
         public void StartServer()
         {
             this.Clients = new List<Client>();
