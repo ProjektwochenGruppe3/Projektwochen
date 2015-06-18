@@ -40,22 +40,36 @@ namespace Editor
             usedComponents = new List<Component>();
 
             var testComponent = new Component();
-            testComponent.FriendlyName = "Testaaaaaaaaaaaaaaaaaaaaaaaa1";
-            testComponent.InputHints = new List<string>() { "string", "int", "double" };
+            testComponent.FriendlyName = "Start";
+            testComponent.InputHints = new List<string>() { };
+            testComponent.OutputHints = new List<string>() { "string" };
+            serverComponents.Add(testComponent);
+
+            var ohneInput = new Component();
+            ohneInput.FriendlyName = "End";
+            ohneInput.InputHints = new List<string>() { "string" };
+            ohneInput.OutputHints = new List<string>() { };
+            serverComponents.Add(ohneInput);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Simple String";
+            testComponent.InputHints = new List<string>() { "string"};
+            testComponent.OutputHints = new List<string>() { "string" };
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Other";
+            testComponent.InputHints = new List<string>() { "string", "double", "int"};
             testComponent.OutputHints = new List<string>() { "string" };
             serverComponents.Add(testComponent);
 
             testComponent = new Component();
             testComponent.FriendlyName = "Test2";
-            testComponent.InputHints = new List<string>() { "string", "int", "string" };
-            testComponent.OutputHints = new List<string>() { "string", "double" };
+            testComponent.InputHints = new List<string>() { "string"};
+            testComponent.OutputHints = new List<string>() { "string"};
             serverComponents.Add(testComponent);
 
-            testComponent = new Component();
-            testComponent.FriendlyName = "Test2";
-            testComponent.InputHints = new List<string>() { "string", "int", "string" };
-            testComponent.OutputHints = new List<string>() { "string", "double", "bla", "lol" };
-            serverComponents.Add(testComponent);
+
 
             foreach (var item in serverComponents)
             {
@@ -417,6 +431,9 @@ namespace Editor
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
             //IPAddress ip = new IPAddress(txt_ip.Text.ToString());
+            //Guid bla = Guid.NewGuid();
+            
+
         }
     }
 }

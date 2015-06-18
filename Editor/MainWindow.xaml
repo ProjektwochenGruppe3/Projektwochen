@@ -8,7 +8,7 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="1">
-            <Canvas Name="canvas" MouseUp="canvas_MouseUp" MouseDown="canvas_MouseDown" MouseMove="canvas_MouseMove" Background="Transparent">
+            <Canvas Name="canvas" MouseUp="canvas_MouseUp" MouseDown="canvas_MouseDown" MouseMove="canvas_MouseMove" Margin="5" Background="Transparent" Width="1370" ClipToBounds="True">
                 <Canvas></Canvas>
             </Canvas>
         </Grid>
@@ -58,11 +58,13 @@
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
                         
                         <Button Grid.Row="0" Margin="2">_Überprüfen</Button>
                         <Button Grid.Row="1" Margin="2">_Ausführen</Button>
-                        <Button Grid.Row="2" Margin="2">_Veröffentlichung</Button>
+                        <Button Grid.Row="2" Margin="2">_Speichern</Button>
+                        <Button Grid.Row="3" Margin="2">S_peichern &amp; Ausführen</Button>
                     </Grid>
                 </Grid>
             </Grid>
