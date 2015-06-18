@@ -22,6 +22,8 @@ namespace ClientAgent
             this.Listener = new TcpListener(IPAddress.Any, 47474);
             this.timer = new System.Timers.Timer();
             this.timer.AutoReset = true;
+            CPU_Diagnostic.InitialisierePerformanceCounter();
+            this.Connect();
         }
 
         private System.Timers.Timer timer;
@@ -63,7 +65,7 @@ namespace ClientAgent
             NetworkStream netStream = this.ClientTCP.GetStream();
             while (this.Alive)
             {
-                AgentKeepAliveResponse response = new AgentKeepAliveResponse(this.firstKeepAliveGuid, this.MyGuid, this.MyName, 75);
+                AgentKeepAliveResponse response = new AgentKeepAliveResponse(this.firstKeepAliveGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
                 Networking.SendPackage(response, netStream);
                 Thread.Sleep(3000);
             }
@@ -91,7 +93,7 @@ namespace ClientAgent
                         AgentKeepAliveRequest request = (AgentKeepAliveRequest)receivedObj;
                         this.firstKeepAliveGuid = request.KeepAliveRequestGuid;
                         this.MyName = request.KeepAliveRequestGuid.ToString() + "_Agent";
-                        AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid, this.MyName, 75);
+                        AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
                         Networking.SendPackage(response, netStream);
                         Console.WriteLine("Data sent...");
                         this.Waiting = false;
