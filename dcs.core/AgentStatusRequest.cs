@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace dcs.core
 {
     [Serializable]
-    public class AgentKeepAliveRequest
+    public class AgentStatusRequest
     {
-        public AgentKeepAliveRequest(Guid guid)
+        public AgentStatusRequest(Guid guid)
         {
             this.KeepAliveRequestGuid = guid;
         }

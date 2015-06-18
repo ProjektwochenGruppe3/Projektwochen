@@ -67,7 +67,7 @@ namespace ClientAgent
                 NetworkStream netStream = this.ClientTCP.GetStream();
                 while (this.Alive)
                 {
-                    AgentKeepAliveResponse response = new AgentKeepAliveResponse(this.firstKeepAliveGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
+                    AgentStatus response = new AgentStatus(this.firstKeepAliveGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
                     Networking.SendPackage(response, netStream);
                     Thread.Sleep(3000);
                 }
@@ -98,10 +98,10 @@ namespace ClientAgent
                         Console.WriteLine("Data available...");
                         object receivedObj = Networking.RecievePackage(netStream);
                         Console.WriteLine("Data received...");
-                        AgentKeepAliveRequest request = (AgentKeepAliveRequest)receivedObj;
+                        AgentStatusRequest request = (AgentStatusRequest)receivedObj;
                         this.firstKeepAliveGuid = request.KeepAliveRequestGuid;
                         this.MyName = request.KeepAliveRequestGuid.ToString() + "_Agent";
-                        AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
+                        AgentStatus response = new AgentStatus(request.KeepAliveRequestGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
                         Networking.SendPackage(response, netStream);
                         Console.WriteLine("Data sent...");
                         this.Waiting = false;

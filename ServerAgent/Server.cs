@@ -123,13 +123,13 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             while (client.ClientAlive)
             {
-                AgentKeepAliveResponse recieved = null;
+                AgentStatus recieved = null;
 
                 try
                 {
                     if (netStream.DataAvailable)
                     {
-                        recieved = Networking.RecievePackage(netStream) as AgentKeepAliveResponse;
+                        recieved = Networking.RecievePackage(netStream) as AgentStatus;
                     }
                 }
                 catch
@@ -174,7 +174,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
         private Guid SendKeepAliveRequest(Client c)
         {
             Guid g = Guid.NewGuid();
-            AgentKeepAliveRequest req = new AgentKeepAliveRequest(g);
+            AgentStatusRequest req = new AgentStatusRequest(g);
 
             Networking.SendPackage(req, c.ClientTcp.GetStream());
 
@@ -184,7 +184,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
         private bool RecieveKeepAliveResponse(Client c, Guid requestguid)
         {
             NetworkStream ns = c.ClientTcp.GetStream();
-            AgentKeepAliveResponse res = null;
+            AgentStatus res = null;
 
             int timer = 0;
 
@@ -192,14 +192,14 @@ namespace ServerAgent_PW_Josef_Benda_V1
             {
                 if (ns.DataAvailable)
                 {
-                    res = Networking.RecievePackage(ns) as AgentKeepAliveResponse;
+                    res = Networking.RecievePackage(ns) as AgentStatus;
                 }
 
                 timer += 50;
                 Thread.Sleep(50);
             }
 
-            if (res == null || res.KeepAliveRequestGuid != requestguid)
+            if (res == null || res.AgentStatusRequestGuid != requestguid)
             {
                 return false;
             }
