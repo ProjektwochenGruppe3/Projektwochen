@@ -21,7 +21,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         public bool ServerAlive { get; set; }
 
-        public System.Timers.Timer KeepAliveTimer { get; set; }
+        //public System.Timers.Timer KeepAliveTimer { get; set; }
 
         public void StartServer()
         {
@@ -89,12 +89,12 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     TcpClient tmpClient = this.Listener.AcceptTcpClient();
                     Thread tmpClientThread = new Thread(new ParameterizedThreadStart(ClientWorker));
                     Client client = new Client(tmpClient, tmpClientThread);
-                    client.ClientThread.Start(client);
-                    Console.WriteLine("A Client has connected!");
+                    Console.WriteLine("Client has connected!");
 
                     if (this.EvaluateKeepAlive(client))
                     {
                         this.Clients.Add(client);
+                        client.ClientThread.Start(client);
                     }
                 }
 
@@ -109,25 +109,16 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             while (client.ClientAlive)
             {
+                AgentKeepAliveResponse recieved = null;
+
                 if (netStream.DataAvailable)
                 {
-                    object recieved = Networking.RecievePackage(netStream);
-
-                    Type t = recieved.GetType();
-
-                    if (t == typeof(AgentKeepAliveResponse))
-                    {
-
-                    }
-                    //else if (t == typeof(JOBRESULT))
-                    //{
-
-                    //}
+                    recieved = Networking.RecievePackage(netStream) as AgentKeepAliveResponse;
                 }
 
-                if (client.SendDataToClient && !netStream.DataAvailable)
+                if (recieved != null)
                 {
-                    
+                    client.CpuLoad = recieved.CpuLoad;
                 }
 
                 Thread.Sleep(50);
