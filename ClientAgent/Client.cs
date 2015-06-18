@@ -82,7 +82,7 @@ namespace ClientAgent
                         object receivedObj = Networking.RecievePackage(netStream);
                         Console.WriteLine("Data received...");
                         AgentKeepAliveRequest request = (AgentKeepAliveRequest)receivedObj;
-                        AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid,request.KeepAliveRequestGuid.ToString() + "_Agent",CPU_Diagontic.GetCPULoad());
+                        AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid,request.KeepAliveRequestGuid.ToString() + "_Agent",75);
                         Networking.SendPackage(response, netStream);
                         Console.WriteLine("Data sent...");
                     }
