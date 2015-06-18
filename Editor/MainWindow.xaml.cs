@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -111,6 +112,8 @@ namespace Editor
             Canvas newMethod = new Canvas();
             newMethod.MouseDown += new MouseButtonEventHandler(MouseDownObject);
             canvas.Children.Add(newMethod);
+            Canvas.SetTop(newMethod, 20);
+            Canvas.SetLeft(newMethod, 50);
 
             int boxTopPosition = 25;
             int boxLeftPosition = 25;
@@ -257,22 +260,6 @@ namespace Editor
                 var p = dockPoint.TranslatePoint(new Point(0, 0), canvas);
                 SelectedLine.X2 = p.X + radius;
                 SelectedLine.Y2 = p.Y + radius;
-
-                //bool dockpointIsInput = false;
-                //Ellipse dockPointOther = null;
-                //Line dockPointLine = null;
-
-                //var dockpointHelper = (DockTag)dockPoint.Tag;
-                //dockHelper.IsEnd = dockpointHelper.IsEnd;
-                //dockHelper.IsInput = dockpointHelper.IsInput;
-                //dockpointHelper.OtherDockPoint = dockpointHelper.OtherDockPoint;
-
-                //dockpointIsInput = dockpointHelper.IsInput;
-                //dockPointOther = dockpointHelper.OtherDockPoint;
-                //dockPointLine = dockpointHelper.DockLine;
-
-                //dockHelper.IsInput = dockpointIsInput;
-                //dockHelper.OtherDockPoint = dockPointOther;
 
                 if (lineHelper.InputDock == null)
                 {
@@ -425,6 +412,11 @@ namespace Editor
                 }
             }
 
+        }
+
+        private void Connect_Click(object sender, RoutedEventArgs e)
+        {
+            //IPAddress ip = new IPAddress(txt_ip.Text.ToString());
         }
     }
 }
