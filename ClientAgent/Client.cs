@@ -138,8 +138,8 @@ namespace ClientAgent
                 if (dllStream.DataAvailable)
                 {
                     object data = Networking.RecievePackage(dllStream);
-                    AtomicJob job = new AtomicJob(ComponentExecuter.GetAssembly(data));
-                    this.TaskList.Add(job);
+                    //AtomicJob job = new AtomicJob(ComponentExecuter.GetAssembly(data));
+                    //this.TaskList.Add(job);
                 }
             }
         }
