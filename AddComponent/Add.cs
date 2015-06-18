@@ -5,16 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Component;
 
-namespace ReplaceWord
+namespace AddComponent
 {
-    class ReplaceWord : IComponent
+    public class Add : IComponent
     {
-        public ReplaceWord()
+        public Add()
         {
             this.ComponentGuid = new Guid();
-            this.FriendlyName = "3_ReplaceWord";
-            this.InputHints = new string[] { "string", "string", "string" };
-            this.OutputHints = new string[] { "string" };
+            this.FriendlyName = "3_Add";
+            this.InputHints = new string[] { "int", "int" };
+            this.OutputHints = new string[] { "int" };
+
         }
 
         public Guid ComponentGuid
@@ -25,18 +26,14 @@ namespace ReplaceWord
 
         public IEnumerable<object> Evaluate(IEnumerable<object> values)
         {
-            string text;
-            string oldVal;
-            string newVal;
-
-            List<object> stringList = new List<object>();
-            stringList = values.ToList();
-            text = (string)stringList[0];
-            oldVal = (string)stringList[1];
-            newVal = (string)stringList[2];
-
-            List<string> resultList = new List<string>();
-            resultList[0] = text.Replace(oldVal, newVal);
+            int a;
+            int b;
+            List<object> intList = new List<object>();
+            intList = values.ToList();
+            a = (int)intList[0];
+            b = (int)intList[1];
+            List<object> resultList = new List<object>();
+            resultList[0] = a + b;
             return resultList;
         }
 

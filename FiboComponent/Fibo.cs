@@ -5,16 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Component;
 
-namespace Mul
+namespace FiboComponent
 {
-    public class Mul : IComponent
+    public class Fibo : IComponent
     {
-           public Mul()
+        public Fibo()
         {
             this.ComponentGuid = new Guid();
-            this.FriendlyName = "3_Mul";
-            this.InputHints = new string[] { "int", "int" };
+            this.FriendlyName = "3_Fibo";
+            this.InputHints = new string[] { "int" };
             this.OutputHints = new string[] { "int" };
+
         }
 
         public Guid ComponentGuid
@@ -25,14 +26,15 @@ namespace Mul
 
         public IEnumerable<object> Evaluate(IEnumerable<object> values)
         {
-            int a;
-            int b;
+            int number;
+            int a = 0;
+            int b = 1;
             List<object> intList = new List<object>();
             intList = values.ToList();
-            a = (int)intList[0];
-            b = (int)intList[1];
+            number = (int)intList[0];
             List<object> resultList = new List<object>();
-            resultList[0] = a * b;
+
+            resultList[0] = a + b;
             return resultList;
         }
 

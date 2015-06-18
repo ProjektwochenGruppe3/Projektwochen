@@ -5,17 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Component;
 
-namespace Prim
+namespace MulComponent
 {
-    public class Prim : IComponent
+    public class Mul : IComponent
     {
-        public Prim()
+        public Mul()
         {
             this.ComponentGuid = new Guid();
-            this.FriendlyName = "3_Prim";
-            this.InputHints = new string[] { "int" };
+            this.FriendlyName = "3_Mul";
+            this.InputHints = new string[] { "int", "int" };
             this.OutputHints = new string[] { "int" };
-
         }
 
         public Guid ComponentGuid
@@ -26,40 +25,15 @@ namespace Prim
 
         public IEnumerable<object> Evaluate(IEnumerable<object> values)
         {
-            int number;
+            int a;
+            int b;
             List<object> intList = new List<object>();
             intList = values.ToList();
-            number = (int)intList[0];
+            a = (int)intList[0];
+            b = (int)intList[1];
             List<object> resultList = new List<object>();
-
-            int index = 0;
-            int count = 1;
-
-            while(index != number)
-            {
-                count++;
-
-                if(CheckPrime(count))
-                {
-                    index++;
-                }
-            }
-
-            resultList[0] = count;
+            resultList[0] = a * b;
             return resultList;
-        }
-
-        public bool CheckPrime(int number)
-        {
-            for (int i = 2; i <= number - 1; i++)
-            {
-                if(number % i == 0)
-                {
-                    return false;
-                }
-            }
-            
-            return true;
         }
 
         public string FriendlyName
