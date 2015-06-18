@@ -44,31 +44,31 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.ServerAlive = false;
         }
 
-        public async void BroadcastKeepAlive()
-        {
-            List<Task> tasks = new List<Task>();
+        //public async void BroadcastKeepAlive()
+        //{
+        //    List<Task> tasks = new List<Task>();
 
-            foreach (Client c in this.Clients)
-            {
-                tasks.Add(this.KeepAliveWorker(c));
-            }
+        //    foreach (Client c in this.Clients)
+        //    {
+        //        tasks.Add(this.KeepAliveWorker(c));
+        //    }
 
-            foreach (var item in tasks)
-            {
-                try
-                {
-                    await item;
-                }
-                catch
-                {
-                }                
-            }
+        //    foreach (var item in tasks)
+        //    {
+        //        try
+        //        {
+        //            await item;
+        //        }
+        //        catch
+        //        {
+        //        }                
+        //    }
 
-            foreach (var item in this.Clients.Where(x => x.ClientAlive == false))
-            {
-                this.Clients.Remove(item);
-            }
-        }
+        //    foreach (var item in this.Clients.Where(x => x.ClientAlive == false))
+        //    {
+        //        this.Clients.Remove(item);
+        //    }
+        //}
 
         //public void SendToAllOtherClients(Client client, string message)
         //{
@@ -107,28 +107,41 @@ namespace ServerAgent_PW_Josef_Benda_V1
             Client client = (Client)args;
             NetworkStream netStream = client.ClientTcp.GetStream();
 
-            while (client.SendDataToClient)
+            while (client.ClientAlive)
             {
                 if (netStream.DataAvailable)
+                {
+                    object recieved = Networking.RecievePackage(netStream);
+
+                    Type t = recieved.GetType();
+
+                    if (t == typeof(AgentKeepAliveResponse))
+                    {
+
+                    }
+                    //else if (t == typeof(JOBRESULT))
+                    //{
+
+                    //}
+                }
+
+                if (client.SendDataToClient && !netStream.DataAvailable)
                 {
                     
                 }
 
-                if (client.SendDataToClient)
-                {
-                    sendBuffer = Encoding.UTF8.GetBytes(client.MessageToClient);
-                    netStream.Write(sendBuffer, 0, sendBuffer.Length);
-                    client.SendDataToClient = false;
-                }
-
                 Thread.Sleep(50);
             }
+
+            netStream.Close();
+            netStream.Dispose();
+            client.ClientTcp.Close();
         }
 
-        private async Task KeepAliveWorker(Client c)
-        {
-            await Task.Run(() => this.EvaluateKeepAlive(c));
-        }
+        //private async Task KeepAliveWorker(Client c)
+        //{
+        //    await Task.Run(() => this.EvaluateKeepAlive(c));
+        //}
 
         private bool EvaluateKeepAlive(Client c)
         {
