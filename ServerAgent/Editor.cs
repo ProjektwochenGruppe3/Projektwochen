@@ -10,16 +10,14 @@ namespace ServerAgent_PW_Josef_Benda_V1
 {
     public class Editor
     {
-        public Editor(TcpClient client, Thread thread)
+        public Editor(TcpClient tcp, Thread thread)
         {
-            this.TcpClient = client;
+            this.TcpClient = tcp;
             this.EditorThread = thread;
         }
 
         public TcpClient TcpClient { get; set; }
 
         public Thread EditorThread { get; set; }
-
-
     }
 }

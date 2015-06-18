@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using dcs.core;
+using Core.Network;
 
 namespace ServerAgent_PW_Josef_Benda_V1
 {
@@ -15,21 +16,31 @@ namespace ServerAgent_PW_Josef_Benda_V1
     {
         private Thread listenerThread;
 
-        public TcpListener Listener { get; set; }
-
-        public List<Client> Clients { get; set; }
-
-        public bool ServerAlive { get; set; }
-
-        public System.Timers.Timer KeepAliveTimer { get; set; }
-
-        public void StartServer()
+        public Server()
         {
             this.Clients = new List<Client>();
             this.ServerAlive = true;
             this.Listener = new TcpListener(IPAddress.Any, 13370);
-            this.Listener.Start();
             this.listenerThread = new Thread(new ThreadStart(ListenerWorker));
+            this.LocalComponents = ServerOperations.GetLocalComponents();
+            this.ServerHandler = new ServerHandler();
+            this.EditorHander = new EditorHandler(this.LocalComponents, this.ServerHandler.GetRemoteComponents());
+        }
+
+        public TcpListener Listener { get; set; }
+
+        public List<Client> Clients { get; set; }
+
+        public List<Component> LocalComponents { get; set; }
+
+        public bool ServerAlive { get; set; }
+
+        private EditorHandler EditorHander { get; set; }
+
+        private ServerHandler ServerHandler { get; set; }
+
+        public void StartServer()
+        {
             this.listenerThread.Start();
         }
 
@@ -82,6 +93,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         public void ListenerWorker()
         {
+            this.Listener.Start();
+
             while (this.ServerAlive)
             {
                 if (this.Listener.Pending())
@@ -89,12 +102,12 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     TcpClient tmpClient = this.Listener.AcceptTcpClient();
                     Thread tmpClientThread = new Thread(new ParameterizedThreadStart(ClientWorker));
                     Client client = new Client(tmpClient, tmpClientThread);
-                    client.ClientThread.Start(client);
-                    Console.WriteLine("A Client has connected!");
+                    Console.WriteLine("Client has connected!");
 
                     if (this.EvaluateKeepAlive(client))
                     {
                         this.Clients.Add(client);
+                        client.ClientThread.Start(client);
                     }
                 }
 
@@ -109,25 +122,17 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             while (client.ClientAlive)
             {
+                AgentKeepAliveResponse recieved = null;
+
                 if (netStream.DataAvailable)
                 {
-                    object recieved = Networking.RecievePackage(netStream);
-
-                    Type t = recieved.GetType();
-
-                    if (t == typeof(AgentKeepAliveResponse))
-                    {
-
-                    }
-                    //else if (t == typeof(JOBRESULT))
-                    //{
-
-                    //}
+                    recieved = Networking.RecievePackage(netStream) as AgentKeepAliveResponse;
                 }
 
-                if (client.SendDataToClient && !netStream.DataAvailable)
+                if (recieved != null)
                 {
-                    
+                    client.CpuLoad = recieved.CpuLoad;
+                    Console.WriteLine("CPU-Load of clien {0} is {1}", client.FriendlyName, client.CpuLoad);
                 }
 
                 Thread.Sleep(50);
@@ -163,7 +168,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             Guid g = Guid.NewGuid();
             AgentKeepAliveRequest req = new AgentKeepAliveRequest(g);
 
-            Networking.SendPackage(g, c.ClientTcp.GetStream());
+            Networking.SendPackage(req, c.ClientTcp.GetStream());
 
             return g;
         }
