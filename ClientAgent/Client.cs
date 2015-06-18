@@ -62,12 +62,20 @@ namespace ClientAgent
 
         public void SendKeepAliveResponse()
         {
-            NetworkStream netStream = this.ClientTCP.GetStream();
-            while (this.Alive)
+            try
             {
-                AgentKeepAliveResponse response = new AgentKeepAliveResponse(this.firstKeepAliveGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
-                Networking.SendPackage(response, netStream);
-                Thread.Sleep(3000);
+                NetworkStream netStream = this.ClientTCP.GetStream();
+                while (this.Alive)
+                {
+                    AgentKeepAliveResponse response = new AgentKeepAliveResponse(this.firstKeepAliveGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
+                    Networking.SendPackage(response, netStream);
+                    Thread.Sleep(3000);
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Server has disconnected!");
+                this.Connect();
             }
         }
 
