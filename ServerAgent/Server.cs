@@ -19,6 +19,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         public List<Client> Clients { get; set; }
 
+        public List<string> ComponentPaths { get; set; }
+
         public bool ServerAlive { get; set; }
 
         //public System.Timers.Timer KeepAliveTimer { get; set; }
@@ -119,6 +121,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 if (recieved != null)
                 {
                     client.CpuLoad = recieved.CpuLoad;
+                    Console.WriteLine("CPU-Load is {0}", client.CpuLoad);
                 }
 
                 Thread.Sleep(50);
@@ -154,7 +157,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             Guid g = Guid.NewGuid();
             AgentKeepAliveRequest req = new AgentKeepAliveRequest(g);
 
-            Networking.SendPackage(g, c.ClientTcp.GetStream());
+            Networking.SendPackage(req, c.ClientTcp.GetStream());
 
             return g;
         }

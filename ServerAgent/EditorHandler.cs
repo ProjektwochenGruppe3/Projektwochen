@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace ServerAgent_PW_Josef_Benda_V1
 {
-    public class Editor
+    public class EditorHandler
     {
-        public Editor(TcpClient client, Thread thread)
+        public EditorHandler(TcpClient client, Thread thread)
         {
             this.TcpClient = client;
             this.EditorThread = thread;
