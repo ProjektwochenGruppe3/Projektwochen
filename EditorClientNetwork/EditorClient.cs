@@ -83,7 +83,12 @@ namespace EditorNetwork
                 return false;
             }
         }
-
+        /// <summary>
+        /// Method for recieving data from the server.
+        /// </summary>
+        /// <param name="client">Object of type EditorClient.</param>
+        /// <param name="response"></param>
+        /// <returns>Returns an IEnumberable of type Component if data was successfully recieved. Returns null </returns>
         public ServerComponentList GetComponent()
         {
             NetworkStream stream = this.TCPClientEditor.GetStream();
