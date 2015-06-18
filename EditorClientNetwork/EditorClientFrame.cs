@@ -38,8 +38,16 @@ namespace EditorNetwork
                 try
                 {
                     counter = counter + 60;
+                    if (client.IpAddress != null && client.Port != null)
+                    {
                     client.TCPClientEditor.Connect(client.IpAddress, client.Port);
                     client.State = ClientState.Connected;
+                    }
+                    else
+                    {
+                        
+                    }
+                   
                 }
 
                 catch (Exception)
@@ -60,22 +68,34 @@ namespace EditorNetwork
             }           
         }
         /// <summary>
-        /// Methods for 
+        /// Method for recieving data from 
         /// </summary>
         /// <param name="client">Object of type EditorClient.</param>
         /// <param name="response"></param>
-        public void GetComponent(EditorClient client, JobRequest response)
+        /// <returns>Returns an IEnumberable of type Component if data was successfully recieved. Returns null </returns>
+        public IEnumerable<Component> GetComponent(EditorClient client, JobRequest response)
         {
             NetworkStream stream = client.TCPClientEditor.GetStream();
+           IEnumerable<Component> comp = null;
             while (client.IsWaiting)
             {              
                 if (stream.DataAvailable)
                 {
                     object receiveddata = Networking.RecievePackage(stream);
-                    IEnumerable<Component> comp = (IEnumerable<Component>)receiveddata;                   
+                    comp = (IEnumerable<Component>)receiveddata;
+                    client.IsWaiting = false;
                 }
                Thread.Sleep(50);
             }
+            if (comp != null)
+            { 
+                return comp;     
+            }
+            else
+            {
+                return null;
+            }
+           
         }
 
         public void SendJobRequest(EditorClient client, JobRequest response)
