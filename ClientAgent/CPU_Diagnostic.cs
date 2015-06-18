@@ -21,7 +21,7 @@ namespace ClientAgent
 
         public static int GetCPUusage() // Liefert die aktuelle Auslastung zurück
         {
-            double d = Math.Round(cpuCounter.NextValue()) * 100;
+            double d = Math.Round(cpuCounter.NextValue()) ;
             return (int)d;
         }
     }
