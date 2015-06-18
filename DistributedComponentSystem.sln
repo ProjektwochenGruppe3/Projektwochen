@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor", "Editor\Editor.csproj", "{38F3C879-6B62-49DA-A737-28E9D5C7EEF2}"
 EndProject
@@ -16,14 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Core.Component.dll = Core.Component.dll
 		Core.Network.dll = Core.Network.dll
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sub", "Sub\Sub.csproj", "{7EC28439-CE8E-4460-AEA0-26C0C8BEBA7A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReplaceWord", "ReplaceWord\ReplaceWord.csproj", "{B2428FF0-5704-463E-B499-358544EDCB4A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Add", "Add\Add.csproj", "{75DFC74E-0D59-4BCC-B286-B4AE86A39DC1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fibo", "Fibo\Fibo.csproj", "{015B10B5-E2E8-4D89-B113-EF17985BB5C3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorClientNetwork", "EditorClientNetwork\EditorClientNetwork.csproj", "{CBA96517-5CB9-4C21-BFCE-25FFBD96D568}"
 EndProject
@@ -49,22 +41,6 @@ Global
 		{DAE141BE-C792-4119-A222-504605CC8F0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DAE141BE-C792-4119-A222-504605CC8F0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DAE141BE-C792-4119-A222-504605CC8F0D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7EC28439-CE8E-4460-AEA0-26C0C8BEBA7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7EC28439-CE8E-4460-AEA0-26C0C8BEBA7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7EC28439-CE8E-4460-AEA0-26C0C8BEBA7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7EC28439-CE8E-4460-AEA0-26C0C8BEBA7A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2428FF0-5704-463E-B499-358544EDCB4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2428FF0-5704-463E-B499-358544EDCB4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2428FF0-5704-463E-B499-358544EDCB4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2428FF0-5704-463E-B499-358544EDCB4A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{75DFC74E-0D59-4BCC-B286-B4AE86A39DC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75DFC74E-0D59-4BCC-B286-B4AE86A39DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{75DFC74E-0D59-4BCC-B286-B4AE86A39DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75DFC74E-0D59-4BCC-B286-B4AE86A39DC1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{015B10B5-E2E8-4D89-B113-EF17985BB5C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{015B10B5-E2E8-4D89-B113-EF17985BB5C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{015B10B5-E2E8-4D89-B113-EF17985BB5C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{015B10B5-E2E8-4D89-B113-EF17985BB5C3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CBA96517-5CB9-4C21-BFCE-25FFBD96D568}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CBA96517-5CB9-4C21-BFCE-25FFBD96D568}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBA96517-5CB9-4C21-BFCE-25FFBD96D568}.Release|Any CPU.ActiveCfg = Release|Any CPU

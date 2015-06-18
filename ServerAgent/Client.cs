@@ -19,6 +19,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.FriendlyName = string.Empty;
         }
 
+        public event EventHandler ClientDisconnected;
+
         public bool SendDataToClient { get; set; }
 
         public Thread ClientThread { get; set; }
@@ -32,5 +34,13 @@ namespace ServerAgent_PW_Josef_Benda_V1
         public string FriendlyName { get; set; }
 
         public Guid ClientGuid { get; set; }
+
+        public void OnClientDisconnected()
+        {
+            if (this.ClientDisconnected != null)
+            {
+                this.ClientDisconnected(this, new EventArgs());
+            }
+        }
     }
 }

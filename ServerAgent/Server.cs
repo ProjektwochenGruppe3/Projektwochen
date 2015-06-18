@@ -27,8 +27,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.EditorHander = new EditorHandler(this.LocalComponents, this.ServerHandler.GetRemoteComponents());
         }
 
-        public TcpListener Listener { get; set; }
-
         public List<Client> Clients { get; set; }
 
         public List<Component> LocalComponents { get; set; }
@@ -38,6 +36,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
         private EditorHandler EditorHander { get; set; }
 
         private ServerHandler ServerHandler { get; set; }
+
+        private TcpListener Listener { get; set; }  
 
         public void StartServer()
         {
@@ -108,6 +108,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     {
                         this.Clients.Add(client);
                         client.ClientThread.Start(client);
+                        client.ClientDisconnected += this.OnClientDisconnected;
                     }
                 }
 
@@ -124,15 +125,22 @@ namespace ServerAgent_PW_Josef_Benda_V1
             {
                 AgentKeepAliveResponse recieved = null;
 
-                if (netStream.DataAvailable)
+                try
                 {
-                    recieved = Networking.RecievePackage(netStream) as AgentKeepAliveResponse;
+                    if (netStream.DataAvailable)
+                    {
+                        recieved = Networking.RecievePackage(netStream) as AgentKeepAliveResponse;
+                    }
+                }
+                catch
+                {
+                    client.OnClientDisconnected();
                 }
 
                 if (recieved != null)
                 {
                     client.CpuLoad = recieved.CpuLoad;
-                    Console.WriteLine("CPU-Load is {0}", client.CpuLoad);
+                    Console.WriteLine("CPU-Load of client {0} is {1}", client.FriendlyName, client.CpuLoad);
                 }
 
                 Thread.Sleep(50);
@@ -200,6 +208,18 @@ namespace ServerAgent_PW_Josef_Benda_V1
             c.FriendlyName = res.FriendlyName;
 
             return true;
+        }
+
+        private void OnClientDisconnected(object sender, EventArgs e)
+        {
+            Client client = sender as Client;
+
+            if (client == null)
+            {
+                return;
+            }
+
+            this.Clients.Remove(client);
         }
     }
 }
