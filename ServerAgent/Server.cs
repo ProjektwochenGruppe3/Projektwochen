@@ -21,7 +21,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         public bool ServerAlive { get; set; }
 
-        public System.Timers.Timer KeepAliveTimer { get; set; }
+        //public System.Timers.Timer KeepAliveTimer { get; set; }
 
         public void StartServer()
         {
@@ -44,31 +44,31 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.ServerAlive = false;
         }
 
-        public async void BroadcastKeepAlive()
-        {
-            List<Task> tasks = new List<Task>();
+        //public async void BroadcastKeepAlive()
+        //{
+        //    List<Task> tasks = new List<Task>();
 
-            foreach (Client c in this.Clients)
-            {
-                tasks.Add(this.KeepAliveWorker(c));
-            }
+        //    foreach (Client c in this.Clients)
+        //    {
+        //        tasks.Add(this.KeepAliveWorker(c));
+        //    }
 
-            foreach (var item in tasks)
-            {
-                try
-                {
-                    await item;
-                }
-                catch
-                {
-                }                
-            }
+        //    foreach (var item in tasks)
+        //    {
+        //        try
+        //        {
+        //            await item;
+        //        }
+        //        catch
+        //        {
+        //        }                
+        //    }
 
-            foreach (var item in this.Clients.Where(x => x.ClientAlive == false))
-            {
-                this.Clients.Remove(item);
-            }
-        }
+        //    foreach (var item in this.Clients.Where(x => x.ClientAlive == false))
+        //    {
+        //        this.Clients.Remove(item);
+        //    }
+        //}
 
         //public void SendToAllOtherClients(Client client, string message)
         //{
@@ -89,12 +89,12 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     TcpClient tmpClient = this.Listener.AcceptTcpClient();
                     Thread tmpClientThread = new Thread(new ParameterizedThreadStart(ClientWorker));
                     Client client = new Client(tmpClient, tmpClientThread);
-                    client.ClientThread.Start(client);
-                    Console.WriteLine("A Client has connected!");
+                    Console.WriteLine("Client has connected!");
 
                     if (this.EvaluateKeepAlive(client))
                     {
                         this.Clients.Add(client);
+                        client.ClientThread.Start(client);
                     }
                 }
 
@@ -107,28 +107,32 @@ namespace ServerAgent_PW_Josef_Benda_V1
             Client client = (Client)args;
             NetworkStream netStream = client.ClientTcp.GetStream();
 
-            while (client.SendDataToClient)
+            while (client.ClientAlive)
             {
+                AgentKeepAliveResponse recieved = null;
+
                 if (netStream.DataAvailable)
                 {
-                    
+                    recieved = Networking.RecievePackage(netStream) as AgentKeepAliveResponse;
                 }
 
-                if (client.SendDataToClient)
+                if (recieved != null)
                 {
-                    sendBuffer = Encoding.UTF8.GetBytes(client.MessageToClient);
-                    netStream.Write(sendBuffer, 0, sendBuffer.Length);
-                    client.SendDataToClient = false;
+                    client.CpuLoad = recieved.CpuLoad;
                 }
 
                 Thread.Sleep(50);
             }
+
+            netStream.Close();
+            netStream.Dispose();
+            client.ClientTcp.Close();
         }
 
-        private async Task KeepAliveWorker(Client c)
-        {
-            await Task.Run(() => this.EvaluateKeepAlive(c));
-        }
+        //private async Task KeepAliveWorker(Client c)
+        //{
+        //    await Task.Run(() => this.EvaluateKeepAlive(c));
+        //}
 
         private bool EvaluateKeepAlive(Client c)
         {
