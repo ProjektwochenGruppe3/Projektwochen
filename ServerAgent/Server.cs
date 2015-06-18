@@ -158,9 +158,9 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         private bool EvaluateKeepAlive(Client c)
         {
-            Guid requestguid = this.SendKeepAliveRequest(c);
+            Guid requestguid = this.SendAgentStatusRequest(c);
 
-            bool success = this.RecieveKeepAliveResponse(c, requestguid);
+            bool success = this.RecieveAgentStatusResponse(c, requestguid);
 
             if (!success)
             {
@@ -171,7 +171,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             return true;
         }
 
-        private Guid SendKeepAliveRequest(Client c)
+        private Guid SendAgentStatusRequest(Client c)
         {
             Guid g = Guid.NewGuid();
             AgentStatusRequest req = new AgentStatusRequest(g);
@@ -181,7 +181,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             return g;
         }
 
-        private bool RecieveKeepAliveResponse(Client c, Guid requestguid)
+        private bool RecieveAgentStatusResponse(Client c, Guid requestguid)
         {
             NetworkStream ns = c.ClientTcp.GetStream();
             AgentStatus res = null;

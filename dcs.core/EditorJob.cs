@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Core.Network;
 
 namespace dcs.core
 {
-    public enum JobAction
+    public class EditorJob : JobRequest
     {
-        Execute,
-        Save,
-        SaveAndExecute
+        public JobState JobState { get; set; }
     }
 }

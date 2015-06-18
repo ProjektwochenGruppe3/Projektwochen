@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="AgentStatusRequest.cs" />
     <Compile Include="AgentStatus.cs" />
+    <Compile Include="EditorJob.cs" />
     <Compile Include="JobAction.cs" />
     <Compile Include="Networking.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
