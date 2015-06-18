@@ -37,8 +37,16 @@ namespace ClientAgent
 
         public static Type GetTypeFromAssembly(Assembly asbly)
         {
-            Type[] objectType = asbly.GetTypes();
-            return objectType[0];
+            Type returnType = null;
+            Type[] objectTypes = asbly.GetTypes();
+            foreach(Type t in objectTypes)
+            {
+                if (t.IsInterface)
+                {
+                    returnType = t;
+                }
+            }
+            return returnType;
         }
 
         public static Assembly GetAssemblyFromDll()
