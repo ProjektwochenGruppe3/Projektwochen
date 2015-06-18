@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Component;
 
-namespace Sub
+namespace SubComponent
 {
     public class Sub : IComponent
     {

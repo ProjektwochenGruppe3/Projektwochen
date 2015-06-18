@@ -15,11 +15,28 @@
         <Grid Grid.Column="0">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50"/>
-                    <RowDefinition/>
+                    <RowDefinition Height="130"/>
+                    <RowDefinition Height="510"/>
+                    <RowDefinition Height="100"/>
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" Margin="5">
-                    <Label>Server Connect...</Label>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0">Server</Label>
+                    <Label Grid.Row="1">Ip:</Label>
+                    <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Width="120" HorizontalAlignment="Right" Name="txt_ip"></TextBox>
+                    <Label Grid.Row="2">Port</Label>
+                    <TextBox Grid.Row="2" Grid.Column="1" Margin="5" Width="50" HorizontalAlignment="Right" Name="txt_port"></TextBox>
+                    <Button Grid.Row="3" Grid.ColumnSpan="2" Width="90" Margin="2.5" HorizontalAlignment="Left" Click="Connect_Click">Connect</Button>
+                    <Button Grid.Row="3" Grid.ColumnSpan="2" Width="90" Margin="2.5" HorizontalAlignment="Right">Disconnect</Button>
                 </Grid>
                 <Grid Grid.Row="1" Margin="5">
                     <ListView Name="componentView" Height="500" VerticalAlignment="Top">
@@ -34,6 +51,19 @@
                             </Style>
                         </ListView.ItemContainerStyle>
                     </ListView>
+                </Grid>
+                <Grid Grid.Row="2">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        
+                        <Button Grid.Row="0" Margin="2">_Überprüfen</Button>
+                        <Button Grid.Row="1" Margin="2">_Ausführen</Button>
+                        <Button Grid.Row="2" Margin="2">_Veröffentlichung</Button>
+                    </Grid>
                 </Grid>
             </Grid>
         </Grid>

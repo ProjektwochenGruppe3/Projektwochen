@@ -5,15 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Component;
 
-namespace Add
+namespace PrimComponent
 {
-    public class Add : IComponent
+    public class Prim : IComponent
     {
-        public Add()
+        public Prim()
         {
             this.ComponentGuid = new Guid();
-            this.FriendlyName = "3_Add";
-            this.InputHints = new string[] { "int", "int" };
+            this.FriendlyName = "3_Prim";
+            this.InputHints = new string[] { "int" };
             this.OutputHints = new string[] { "int" };
 
         }
@@ -26,15 +26,40 @@ namespace Add
 
         public IEnumerable<object> Evaluate(IEnumerable<object> values)
         {
-            int a;
-            int b;
+            int number;
             List<object> intList = new List<object>();
             intList = values.ToList();
-            a = (int)intList[0];
-            b = (int)intList[1];
+            number = (int)intList[0];
             List<object> resultList = new List<object>();
-            resultList[0] = a + b;
+
+            int index = 0;
+            int count = 1;
+
+            while (index != number)
+            {
+                count++;
+
+                if (CheckPrime(count))
+                {
+                    index++;
+                }
+            }
+
+            resultList.Add(count);
             return resultList;
+        }
+
+        public bool CheckPrime(int number)
+        {
+            for (int i = 2; i <= number - 1; i++)
+            {
+                if (number % i == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public string FriendlyName
