@@ -33,7 +33,7 @@ namespace Add
             a = (int)intList[0];
             b = (int)intList[1];
             List<object> resultList = new List<object>();
-            resultList[0] = a + b;
+            resultList.Add(a + b);
             return resultList;
         }
 
