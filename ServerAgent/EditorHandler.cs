@@ -17,7 +17,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             this.ConnectedEditors = new List<Editor>();
             this.ComponentList = new List<Component>();
-            
+            this.UpdateComponentList(localcomponents, remotecomponents);
 
             this.Listener = new TcpListener(IPAddress.Any, 30000);
         }
@@ -46,7 +46,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
 
         }
-
 
         private void ListenerWorker()
         {
