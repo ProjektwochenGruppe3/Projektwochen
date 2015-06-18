@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace dcs.core
 {
+    [Serializable]
     public class AgentKeepAliveRequest
     {
         public AgentKeepAliveRequest(Guid guid)

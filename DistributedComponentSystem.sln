@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor", "Editor\Editor.csproj", "{38F3C879-6B62-49DA-A737-28E9D5C7EEF2}"
 EndProject
@@ -22,6 +22,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReplaceWord", "ReplaceWord\ReplaceWord.csproj", "{B2428FF0-5704-463E-B499-358544EDCB4A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Add", "Add\Add.csproj", "{75DFC74E-0D59-4BCC-B286-B4AE86A39DC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fibo", "Fibo\Fibo.csproj", "{015B10B5-E2E8-4D89-B113-EF17985BB5C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorClientNetwork", "EditorClientNetwork\EditorClientNetwork.csproj", "{CBA96517-5CB9-4C21-BFCE-25FFBD96D568}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +61,14 @@ Global
 		{75DFC74E-0D59-4BCC-B286-B4AE86A39DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75DFC74E-0D59-4BCC-B286-B4AE86A39DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75DFC74E-0D59-4BCC-B286-B4AE86A39DC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{015B10B5-E2E8-4D89-B113-EF17985BB5C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{015B10B5-E2E8-4D89-B113-EF17985BB5C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{015B10B5-E2E8-4D89-B113-EF17985BB5C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{015B10B5-E2E8-4D89-B113-EF17985BB5C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBA96517-5CB9-4C21-BFCE-25FFBD96D568}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBA96517-5CB9-4C21-BFCE-25FFBD96D568}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBA96517-5CB9-4C21-BFCE-25FFBD96D568}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBA96517-5CB9-4C21-BFCE-25FFBD96D568}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
