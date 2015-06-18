@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using dcs.core;
+using Core.Network;
 
 namespace ServerAgent_PW_Josef_Benda_V1
 {
@@ -15,21 +16,31 @@ namespace ServerAgent_PW_Josef_Benda_V1
     {
         private Thread listenerThread;
 
-        public TcpListener Listener { get; set; }
-
-        public List<Client> Clients { get; set; }
-
-        public List<string> ComponentPaths { get; set; }
-
-        public bool ServerAlive { get; set; }
-
-        public void StartServer()
+        public Server()
         {
             this.Clients = new List<Client>();
             this.ServerAlive = true;
             this.Listener = new TcpListener(IPAddress.Any, 13370);
-            this.Listener.Start();
             this.listenerThread = new Thread(new ThreadStart(ListenerWorker));
+            this.LocalComponents = ServerOperations.GetLocalComponents();
+            this.ServerHandler = new ServerHandler();
+            this.EditorHander = new EditorHandler(this.LocalComponents, this.ServerHandler.GetRemoteComponents());
+        }
+
+        public TcpListener Listener { get; set; }
+
+        public List<Client> Clients { get; set; }
+
+        public List<Component> LocalComponents { get; set; }
+
+        public bool ServerAlive { get; set; }
+
+        private EditorHandler EditorHander { get; set; }
+
+        private ServerHandler ServerHandler { get; set; }
+
+        public void StartServer()
+        {
             this.listenerThread.Start();
         }
 
@@ -82,6 +93,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         public void ListenerWorker()
         {
+            this.Listener.Start();
+
             while (this.ServerAlive)
             {
                 if (this.Listener.Pending())
