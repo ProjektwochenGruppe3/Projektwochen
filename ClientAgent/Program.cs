@@ -11,14 +11,14 @@ namespace ClientAgent
     {
         static void Main(string[] args)
         {
-            //Client c = new Client(args[0],int.Parse(args[1]));
+            Client c = new Client(args[0],int.Parse(args[1]));
 
-            IEnumerable<object> result = ComponentExecuter.InvokeMethod(ComponentExecuter.GetTypeFromAssembly(ComponentExecuter.GetAssemblyFromDll()), new object[] { 1, 2 });
-            foreach (object o in result.ToList())
-            {
-                Console.WriteLine(o.ToString());
-            }
-            Console.ReadKey();
+            //IEnumerable<object> result = ComponentExecuter.InvokeMethod(ComponentExecuter.GetTypeFromAssembly(ComponentExecuter.GetAssemblyFromDll()), new object[] { 1, 2 });
+            //foreach (object o in result.ToList())
+            //{
+            //    Console.WriteLine(o.ToString());
+            //}
+            //Console.ReadKey();
         }
     }
 }
