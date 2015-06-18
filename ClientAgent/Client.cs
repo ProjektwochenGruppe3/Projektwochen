@@ -20,7 +20,17 @@ namespace ClientAgent
             this.port = inputPort;
             this.MyGuid = new Guid();
             this.Listener = new TcpListener(IPAddress.Any, 47474);
+            this.timer = new System.Timers.Timer();
+            this.timer.AutoReset = true;
+            CPU_Diagnostic.InitialisierePerformanceCounter();
+            this.Connect();
         }
+
+        private System.Timers.Timer timer;
+
+        private Guid firstKeepAliveGuid;
+
+        private string MyName;
 
         public Guid MyGuid { get; private set; }
 
@@ -50,39 +60,60 @@ namespace ClientAgent
 
         public bool Waiting { get; private set; }
 
-        public void ClientWorker()
+        public void SendKeepAliveResponse()
         {
-            NetworkStream netStream = this.ClientTCP.GetStream();
-            byte[] receiveBuffer = new byte[500];
-            byte[] sendBuffer = new byte[500];
-            while (this.Alive)
+            try
             {
-                if (netStream.DataAvailable)
+                NetworkStream netStream = this.ClientTCP.GetStream();
+                while (this.Alive)
                 {
+                    AgentKeepAliveResponse response = new AgentKeepAliveResponse(this.firstKeepAliveGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
+                    Networking.SendPackage(response, netStream);
+                    Thread.Sleep(3000);
                 }
-                if (this.SendDataAvailable)
-                {
-                }
-                Thread.Sleep(50);
+            }
+            catch
+            {
+                Console.WriteLine("Server has disconnected!");
+                this.Connect();
             }
         }
 
         public void FirstConnect()
         {
-            Console.WriteLine("Trying to connect...");
-            NetworkStream netStream = this.ClientTCP.GetStream();
+            NetworkStream netStream = null;
+
             while (this.Waiting)
             {
-                if (netStream.DataAvailable)
+                try
                 {
-                    Console.WriteLine("Data available...");
-                    object receivedObj = Networking.RecievePackage(netStream);
-                    Console.WriteLine("Data received...");
-                    AgentKeepAliveRequest request = (AgentKeepAliveRequest)receivedObj;
-                    AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid,request.KeepAliveRequestGuid.ToString() + "_Agent",CPU_Diagontic.GetCPULoad());
-                    Networking.SendPackage(response, netStream);
-                    Console.WriteLine("Data sent...");
+                    if (netStream == null)
+                    {
+                        Console.WriteLine("Trying to connect...");
+                        this.ClientTCP.Connect(IPAddress.Parse(this.ipAdress), this.port);
+                        netStream = this.ClientTCP.GetStream();
+                    }
+                    else if (netStream.DataAvailable)
+                    {
+                        Console.WriteLine("Data available...");
+                        object receivedObj = Networking.RecievePackage(netStream);
+                        Console.WriteLine("Data received...");
+                        AgentKeepAliveRequest request = (AgentKeepAliveRequest)receivedObj;
+                        this.firstKeepAliveGuid = request.KeepAliveRequestGuid;
+                        this.MyName = request.KeepAliveRequestGuid.ToString() + "_Agent";
+                        AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
+                        Networking.SendPackage(response, netStream);
+                        Console.WriteLine("Data sent...");
+                        this.Waiting = false;
+                        this.State = ClientState.connected;
+                    }
                 }
+                catch
+                {
+                    Console.WriteLine("Connection Failed!");
+                }
+
+                Thread.Sleep(10);
             }
         }
 
@@ -107,8 +138,8 @@ namespace ClientAgent
                 if (dllStream.DataAvailable)
                 {
                     object data = Networking.RecievePackage(dllStream);
-                    AtomicJob job = new AtomicJob(ComponentExecuter.GetAssembly(data));
-                    this.TaskList.Add(job);
+                    //AtomicJob job = new AtomicJob(ComponentExecuter.GetAssembly(data));
+                    //this.TaskList.Add(job);
                 }
             }
         }
@@ -116,8 +147,8 @@ namespace ClientAgent
         public void Connect()
         {
             this.Alive = true;
+            this.Waiting = true;
             this.ClientTCP = new TcpClient();
-            this.ClientTCP.Connect(IPAddress.Parse(this.ipAdress), this.port);
             this.State = ClientState.connecting;
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = 60000;
@@ -126,12 +157,12 @@ namespace ClientAgent
             this.ClientThread.Join();
             if (this.State == ClientState.connected)
             {
-                this.ClientThread = new Thread(new ThreadStart(ClientWorker));
+                this.ClientThread = new Thread(new ThreadStart(SendKeepAliveResponse));
                 this.ClientThread.Start();
             }
             else
             {
-                Console.WriteLine("Error while first connect to server!");
+                Console.WriteLine("Error: Connection timer ran out!");
             }
         }
 
