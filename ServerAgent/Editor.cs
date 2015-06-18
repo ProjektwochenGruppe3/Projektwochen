@@ -8,14 +8,16 @@ using System.Threading.Tasks;
 
 namespace ServerAgent_PW_Josef_Benda_V1
 {
-    public class EditorHandler
+    public class Editor
     {
-        public EditorHandler(TcpClient client, Thread thread)
+        public Editor(TcpClient tcp, Thread thread)
         {
-            this.TcpClient = client;
+            this.TcpClient = tcp;
             this.EditorThread = thread;
         }
 
-        private List<Editor> ConnectedEditors { get; set; }
+        public TcpClient TcpClient { get; set; }
+
+        public Thread EditorThread { get; set; }
     }
 }
