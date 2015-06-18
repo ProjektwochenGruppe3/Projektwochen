@@ -5,16 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Component;
 
-namespace Mul
+namespace AddComponent
 {
-    public class Mul : IComponent
+    public class Add : IComponent
     {
-           public Mul()
+        public Add()
         {
             this.ComponentGuid = new Guid();
-            this.FriendlyName = "3_Mul";
+            this.FriendlyName = "3_Add";
             this.InputHints = new string[] { "int", "int" };
             this.OutputHints = new string[] { "int" };
+
         }
 
         public Guid ComponentGuid
@@ -32,7 +33,7 @@ namespace Mul
             a = (int)intList[0];
             b = (int)intList[1];
             List<object> resultList = new List<object>();
-            resultList[0] = a * b;
+            resultList.Add(a + b);
             return resultList;
         }
 

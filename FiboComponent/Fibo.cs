@@ -5,16 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Component;
 
-namespace ReplaceWord
+namespace FiboComponent
 {
-    class ReplaceWord : IComponent
+    public class Fibo : IComponent
     {
-        public ReplaceWord()
+        public Fibo()
         {
             this.ComponentGuid = new Guid();
-            this.FriendlyName = "3_ReplaceWord";
-            this.InputHints = new string[] { "string", "string", "string" };
-            this.OutputHints = new string[] { "string" };
+            this.FriendlyName = "3_Fibo";
+            this.InputHints = new string[] { "int" };
+            this.OutputHints = new string[] { "int" };
+
         }
 
         public Guid ComponentGuid
@@ -25,18 +26,15 @@ namespace ReplaceWord
 
         public IEnumerable<object> Evaluate(IEnumerable<object> values)
         {
-            string text;
-            string oldVal;
-            string newVal;
+            int number;
+            int a = 0;
+            int b = 1;
+            List<object> intList = new List<object>();
+            intList = values.ToList();
+            number = (int)intList[0];
+            List<object> resultList = new List<object>();
 
-            List<object> stringList = new List<object>();
-            stringList = values.ToList();
-            text = (string)stringList[0];
-            oldVal = (string)stringList[1];
-            newVal = (string)stringList[2];
-
-            List<string> resultList = new List<string>();
-            resultList[0] = text.Replace(oldVal, newVal);
+            resultList[0] = a + b;
             return resultList;
         }
 
