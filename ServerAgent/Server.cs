@@ -132,7 +132,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 if (recieved != null)
                 {
                     client.CpuLoad = recieved.CpuLoad;
-                    Console.WriteLine("CPU-Load is {0}", client.CpuLoad);
+                    Console.WriteLine("CPU-Load of clien {0} is {1}", client.FriendlyName, client.CpuLoad);
                 }
 
                 Thread.Sleep(50);
