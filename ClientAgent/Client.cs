@@ -20,7 +20,15 @@ namespace ClientAgent
             this.port = inputPort;
             this.MyGuid = new Guid();
             this.Listener = new TcpListener(IPAddress.Any, 47474);
+            this.timer = new System.Timers.Timer();
+            this.timer.AutoReset = true;
         }
+
+        private System.Timers.Timer timer;
+
+        private Guid firstKeepAliveGuid;
+
+        private string MyName;
 
         public Guid MyGuid { get; private set; }
 
@@ -50,20 +58,14 @@ namespace ClientAgent
 
         public bool Waiting { get; private set; }
 
-        public void ClientWorker()
+        public void SendKeepAliveResponse()
         {
             NetworkStream netStream = this.ClientTCP.GetStream();
-            byte[] receiveBuffer = new byte[500];
-            byte[] sendBuffer = new byte[500];
             while (this.Alive)
             {
-                if (netStream.DataAvailable)
-                {
-                }
-                if (this.SendDataAvailable)
-                {
-                }
-                Thread.Sleep(50);
+                AgentKeepAliveResponse response = new AgentKeepAliveResponse(this.firstKeepAliveGuid, this.MyGuid, request.KeepAliveRequestGuid.ToString() + "_Agent", 75);
+                Networking.SendPackage(response, netStream);
+                Thread.Sleep(3000);
             }
         }
 
@@ -87,10 +89,13 @@ namespace ClientAgent
                         object receivedObj = Networking.RecievePackage(netStream);
                         Console.WriteLine("Data received...");
                         AgentKeepAliveRequest request = (AgentKeepAliveRequest)receivedObj;
-                        AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid, request.KeepAliveRequestGuid.ToString() + "_Agent", 75);
+                        this.firstKeepAliveGuid = request.KeepAliveRequestGuid;
+                        this.MyName = request.KeepAliveRequestGuid.ToString() + "_Agent";
+                        AgentKeepAliveResponse response = new AgentKeepAliveResponse(request.KeepAliveRequestGuid, this.MyGuid, this.MyName, 75);
                         Networking.SendPackage(response, netStream);
                         Console.WriteLine("Data sent...");
                         this.Waiting = false;
+                        this.State = ClientState.connected;
                     }
                 }
                 catch
@@ -142,7 +147,7 @@ namespace ClientAgent
             this.ClientThread.Join();
             if (this.State == ClientState.connected)
             {
-                this.ClientThread = new Thread(new ThreadStart(ClientWorker));
+                this.ClientThread = new Thread(new ThreadStart(SendKeepAliveResponse));
                 this.ClientThread.Start();
             }
             else
