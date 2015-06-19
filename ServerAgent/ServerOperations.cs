@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Component;
@@ -12,6 +13,25 @@ namespace ServerAgent_PW_Josef_Benda_V1
 {
     public static class ServerOperations
     {
+        public static BinaryFormatter formatter = new BinaryFormatter();
+
+        internal static void SaveComponent(Component component)
+        {
+            string path = Path.Combine(Environment.CurrentDirectory, "Components", component.ComponentGuid.ToString(), ".comp");
+
+            try
+            {
+                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    ServerOperations.formatter.Serialize(fs, component);
+                    fs.Flush();
+                }
+            }
+            catch
+            {
+            }
+        }
+
         internal static byte[] GetComponentBytes(Guid compguid)
         {
             string path = Path.Combine(Environment.CurrentDirectory, "Components");
@@ -27,7 +47,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     foreach (var type in types)
                     {
                         var instance = Activator.CreateInstance(type) as IComponent;
-                        
+
                         if (instance.ComponentGuid == compguid)
                         {
                             return File.ReadAllBytes(ass.Location);
@@ -76,16 +96,9 @@ namespace ServerAgent_PW_Josef_Benda_V1
             {
                 try
                 {
-                    Assembly ass = Assembly.LoadFile(item);
-
-                    if (ass.IsDefined(typeof(Component)))
+                    using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
-                        var instance = Activator.CreateInstance(ass.GetType("Component", true)) as Component;
-
-                        if (instance != null)
-                        {
-                            components.Add(instance);
-                        }
+                        components.Add(ServerOperations.formatter.Deserialize(fs) as Component);
                     }
                 }
                 catch

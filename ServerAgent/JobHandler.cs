@@ -15,15 +15,22 @@ namespace ServerAgent_PW_Josef_Benda_V1
         public JobHandler(Server server)
         {
             this.Server = server;
+            this.AtomicComponents = new List<Component>();
         }
+
+        public event EventHandler JobDone;
 
         private Server Server { get; set; }
 
-        public void NewJob(EditorJob job)
+        private List<Component> AtomicComponents { get; set; }
+
+        public void NewJob(object jobobj)
         {
+            EditorJob job = (EditorJob)jobobj;
+
             if (job.JobAction == JobAction.Save)
             {
-                //TODO
+                ServerOperations.SaveComponent(job.JobComponent);
             }
             else
             {
@@ -33,39 +40,46 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             if (job.JobAction == JobAction.SaveAndExecute)
             {
-
+                ServerOperations.SaveComponent(job.JobComponent);
             }
         }
 
         private void ExecuteJob(JobRequest request)
         {
-            if (request.JobComponent.IsAtomic)
+            this.SplitComponent(request.JobComponent);
+
+            Component comp = this.Server.LocalComponents.FirstOrDefault(x => x.ComponentGuid == request.JobComponent.ComponentGuid);
+
+            // Not null, if component exists locally
+            if (comp != null)
             {
-                Component comp = this.Server.LocalComponents.FirstOrDefault(x => x.ComponentGuid == request.JobComponent.ComponentGuid);
+                ClientInfo info = this.FindTargetClient(request);
 
-                // Not null, if component exists locally
-                if (comp != null)
-                {
-                    ClientInfo info = this.FindTargetClient(request);
-
-                    this.SendAtomicComponent(request, info);
-                }
-                else
-                {
-                }
+                this.SendAtomicComponent(request, info);
             }
             else
             {
-                // ALG
+                // Server handler request component
             }
         }
 
-        public void SendAtomicComponent(JobRequest request, ClientInfo info)
+        private void SplitComponent(Component component)
+        {
+            if (component.IsAtomic)
+            {
+                this.AtomicComponents.Add(component);
+                return;
+            }
+
+
+        }
+
+        public void DebugSendAtomicComponent(JobRequest request, ClientInfo info)
         {
             //byte[] comp = ServerOperations.GetComponentBytes(request.JobComponent.ComponentGuid);
             byte[] comp = System.IO.File.ReadAllBytes(System.IO.Path.Combine(Environment.CurrentDirectory, "Components", "ConsoleInput.dll"));
             AgentExecutable package = new AgentExecutable(comp);
-            
+
             //DEBUG
             TcpClient client = new TcpClient();
             client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 47474));
@@ -83,6 +97,15 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     break;
                 }
             }
+        }
+
+        private void SendAtomicComponent(JobRequest request, ClientInfo info)
+        {
+            //byte[] comp = ServerOperations.GetComponentBytes(request.JobComponent.ComponentGuid);
+            byte[] comp = System.IO.File.ReadAllBytes(System.IO.Path.Combine(Environment.CurrentDirectory, "Components", "ConsoleInput.dll"));
+            AgentExecutable package = new AgentExecutable(comp);
+
+
         }
 
         private ClientInfo FindTargetClient(JobRequest request)
