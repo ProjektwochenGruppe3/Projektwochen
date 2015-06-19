@@ -52,7 +52,7 @@ namespace EditorNetwork
                 try
                 {
                     counter = counter + 60;
-                    if (this.IpAddress != null && this.Port != null)
+                    if (this.IpAddress != null)
                     {
                         this.TCPClientEditor.Connect(this.IpAddress, this.Port);
                         this.State = ClientState.Connected;
@@ -66,10 +66,12 @@ namespace EditorNetwork
 
                 }
 
-                catch (Exception)
+                catch (Exception e)
                 {
                     this.State = ClientState.Disconnected;
                     Thread.Sleep(60);
+                    throw new SocketException();
+                    
                 }
             }
 
