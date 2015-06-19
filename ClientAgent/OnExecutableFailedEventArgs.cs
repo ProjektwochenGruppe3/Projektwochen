@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClientAgent
 {
-    class OnExecutableFailedEventArgs
+    public class OnExecutableFailedEventArgs
     {
     }
 }

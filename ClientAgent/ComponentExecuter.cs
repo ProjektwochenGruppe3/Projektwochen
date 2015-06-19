@@ -10,16 +10,16 @@ namespace ClientAgent
 {
     public static class ComponentExecuter
     {
-        public static IEnumerable<object> InvokeMethod(Type type, IEnumerable<object> values)
+        public static IEnumerable<object> InvokeMethod(AtomicJob job)
         {
             IEnumerable<object> result = null;
-            if (type != null)
+            if (job.ExecutableType != null)
             {
-                MethodInfo method = type.GetMethod("Evaluate");
+                MethodInfo method = job.ExecutableType.GetMethod("Evaluate");
                 if (method != null)
                 {
-                    object classInstance = Activator.CreateInstance(type, null);
-                    object[] parameters = new object[] { values };
+                    object classInstance = Activator.CreateInstance(job.ExecutableType, null);
+                    object[] parameters = new object[] { job.Params };
                     object resultObject = method.Invoke(classInstance, parameters);
                     result = (IEnumerable<object>)resultObject;
                 }
@@ -55,9 +55,9 @@ namespace ClientAgent
             return returnType;
         }
 
-        public static Assembly GetAssemblyFromDll()
+        public static Assembly GetAssemblyFromDll(string path)
         {
-            Assembly asbly = Assembly.LoadFile("C:\\Users\\Josef\\Desktop\\Add_Test.dll");
+            Assembly asbly = Assembly.LoadFile(path);
             return asbly;
         }
     }
