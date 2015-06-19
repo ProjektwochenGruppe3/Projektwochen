@@ -60,17 +60,20 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
-        private void SendAtomicComponent(JobRequest request, ClientInfo info)
+        public void SendAtomicComponent(JobRequest request, ClientInfo info)
         {
-            byte[] comp = ServerOperations.GetComponentBytes(request.JobComponent.ComponentGuid);
-
+            //byte[] comp = ServerOperations.GetComponentBytes(request.JobComponent.ComponentGuid);
+            byte[] comp = System.IO.File.ReadAllBytes(System.IO.Path.Combine(Environment.CurrentDirectory, "Components", "ConsoleInput.dll"));
             AgentExecutable package = new AgentExecutable(comp);
-
+            
+            //DEBUG
             TcpClient client = new TcpClient();
-            client.Connect(new IPEndPoint(IPAddress.Parse("10.13.51.58"), 47474));
+            client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 47474));
             NetworkStream ns = client.GetStream();
 
             Networking.SendPackage(package, ns);
+
+            Networking.SendPackage(new AgentExecutableParameters(null), ns);
 
             while (true)
             {
