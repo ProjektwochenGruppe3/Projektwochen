@@ -211,6 +211,7 @@ namespace Editor
                 dockHelper.DockLine = null;
                 dockHelper.IsInput = false;
                 dockHelper.OtherDockPoint = null;
+                dockHelper.Guid = Guid.NewGuid();
                 dockHelper.DataType = toAdd.OutputHints.ToList()[i].ToString();
                 dockPointOutput.Tag = dockHelper;
 
@@ -254,6 +255,7 @@ namespace Editor
                 dockHelper.DockLine = null;
                 dockHelper.IsInput = true;
                 dockHelper.OtherDockPoint = null;
+                dockHelper.Guid = Guid.NewGuid();
                 dockHelper.DataType = toAdd.InputHints.ToList()[i].ToString();
                 dockPointInput.Tag = dockHelper;
 
