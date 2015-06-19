@@ -22,6 +22,7 @@ namespace ClientAgent
             this.Listener = new TcpListener(IPAddress.Any, 47474);
             this.timer = new System.Timers.Timer();
             this.timer.AutoReset = true;
+            this.TaskList = new List<AtomicJob>();
             CPU_Diagnostic.InitialisierePerformanceCounter();
             this.Connect();
         }
@@ -69,7 +70,7 @@ namespace ClientAgent
                 {
                     AgentStatus response = new AgentStatus(this.firstKeepAliveGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
                     Networking.SendPackage(response, netStream);
-                    Thread.Sleep(3000);
+                    Thread.Sleep(5000);
                 }
             }
             catch
@@ -131,7 +132,7 @@ namespace ClientAgent
             AtomicJob job = (AtomicJob)atomicJob;
             ExecutableHandler handler = new ExecutableHandler();
             NetworkStream dllStream = job.Server.GetStream();
-            string jobDllPath = Environment.CurrentDirectory + "\\Job_Dlls\\" + job.AtJobGuid + ".dll";
+            string jobDllPath = Environment.CurrentDirectory + job.AtJobGuid + ".dll";
             job.OnExecutableResultsReady += handler.WriteResultToStream;
             while (job.InProgress)
             {
@@ -200,6 +201,7 @@ namespace ClientAgent
                 this.ClientThread = new Thread(new ThreadStart(SendKeepAliveResponse));
                 this.ClientThread.Start();
                 this.Listener.Start();
+                this.ListenerActive = true;
                 this.ListenerThread = new Thread(new ThreadStart(ListenerWorker));
                 this.ListenerThread.Start();
             }
