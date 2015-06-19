@@ -14,5 +14,7 @@ namespace Editor
         public bool IsInput { get; set; }
         public string DataType { get; set; }
         public Ellipse OtherDockPoint { get; set; }
+        public bool IsReady { get; set; }
+        public Guid Guid { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Core.Network;
+using EditorNetwork;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,16 +29,22 @@ namespace Editor
 
         public Line SelectedLine;
 
+        EditorClient MyEditorClient;
+
         private List<Component> serverComponents;
-        private List<Component> usedComponents;
+        private List<Canvas> usedComponents;
 
         private int radius = 10;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            txt_ip.Text = "192.168.0.1";
+            txt_port.Text = "30000";
+
             serverComponents = new List<Component>();
-            usedComponents = new List<Component>();
+            usedComponents = new List<Canvas>();
 
             var testComponent = new Component();
             testComponent.FriendlyName = "Start";
@@ -53,20 +60,20 @@ namespace Editor
 
             testComponent = new Component();
             testComponent.FriendlyName = "Simple String";
-            testComponent.InputHints = new List<string>() { "string"};
+            testComponent.InputHints = new List<string>() { "string" };
             testComponent.OutputHints = new List<string>() { "string" };
             serverComponents.Add(testComponent);
 
             testComponent = new Component();
             testComponent.FriendlyName = "Other";
-            testComponent.InputHints = new List<string>() { "string", "double", "int"};
+            testComponent.InputHints = new List<string>() { "string", "string", "string" };
             testComponent.OutputHints = new List<string>() { "string" };
             serverComponents.Add(testComponent);
 
             testComponent = new Component();
             testComponent.FriendlyName = "Test2";
-            testComponent.InputHints = new List<string>() { "string"};
-            testComponent.OutputHints = new List<string>() { "string"};
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
             serverComponents.Add(testComponent);
 
 
@@ -211,6 +218,7 @@ namespace Editor
                 dockHelper.DockLine = null;
                 dockHelper.IsInput = false;
                 dockHelper.OtherDockPoint = null;
+                dockHelper.Guid = Guid.NewGuid();
                 dockHelper.DataType = toAdd.OutputHints.ToList()[i].ToString();
                 dockPointOutput.Tag = dockHelper;
 
@@ -254,11 +262,15 @@ namespace Editor
                 dockHelper.DockLine = null;
                 dockHelper.IsInput = true;
                 dockHelper.OtherDockPoint = null;
+                dockHelper.Guid = Guid.NewGuid();
                 dockHelper.DataType = toAdd.InputHints.ToList()[i].ToString();
                 dockPointInput.Tag = dockHelper;
 
                 j = j + inputHeight;
             }
+
+            newMethod.Tag = toAdd;
+            usedComponents.Add(newMethod);
         }
 
         private void dockPoint_MouseUp(object sender, MouseButtonEventArgs e)
@@ -268,6 +280,11 @@ namespace Editor
                 var dockPoint = sender as Ellipse;
 
                 DockTag dockHelper = (DockTag)dockPoint.Tag;
+
+                if (dockHelper.OtherDockPoint != null)
+                {
+                    (dockHelper.OtherDockPoint.Tag as DockTag).OtherDockPoint = null;
+                }
 
                 var lineHelper = (LineTag)SelectedLine.Tag;
 
@@ -339,6 +356,7 @@ namespace Editor
 
                 if (dockHelper.OtherDockPoint != null)
                 {
+                    (dockHelper.OtherDockPoint.Tag as DockTag).OtherDockPoint = null;
                     ((dockPoint.Parent as Canvas).Parent as Canvas).Children.Remove(((DockTag)dockPoint.Tag).DockLine);
                 }
 
@@ -430,10 +448,249 @@ namespace Editor
 
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
-            //IPAddress ip = new IPAddress(txt_ip.Text.ToString());
-            //Guid bla = Guid.NewGuid();
-            
+            IPAddress ip;
+            int port;
 
+            try
+            {
+                ip = IPAddress.Parse(txt_ip.Text.ToString());
+            }
+            catch
+            {
+                MessageBox.Show("Bitte geben Sie eine gültige Ip-Adresse ein!");
+                txt_ip.Text = string.Empty;
+                return;
+            }
+            try
+            {
+                port = Convert.ToInt32(txt_port.Text.ToString());
+            }
+            catch
+            {
+                MessageBox.Show("Bitte geben Sie einen gültigen Port ein!");
+                txt_port.Text = string.Empty;
+                return;
+            }
+
+            if (MyEditorClient != null)
+            {
+                MyEditorClient.CloseDown();
+            }
+
+            try
+            {
+                MyEditorClient = new EditorClient(ip, port);
+                MyEditorClient.ConnecttoServer();
+            }
+            catch
+            {
+                MyEditorClient = null;
+                MessageBox.Show("Verbindung konnte nicht aufgebaut werden");
+                return;
+            }
+
+            btn_disconnect.IsEnabled = true;
+            btn_connect.IsEnabled = false;
+        }
+
+        private validTypes GraphisValid()
+        {
+            validTypes result = validTypes.componentjob;
+
+            if (usedComponents.Count <= 1)
+            {
+                return validTypes.none;
+            }
+
+            // Check if there is an open end - if there is one - it is a a component in the best case
+            bool foundEmpty = false;
+
+            foreach (var item in canvas.Children)
+            {
+                if (foundEmpty == true)
+                {
+                    break;
+                }
+
+                if (item is Canvas)
+                {
+                    Canvas canvasCast = item as Canvas;
+
+                    foreach (var item2 in canvasCast.Children)
+                    {
+                        if (item2 is Ellipse)
+                        {
+                            Ellipse ellipseCast = item2 as Ellipse;
+
+                            DockTag ellipseTag = ellipseCast.Tag as DockTag;
+
+                            if (ellipseTag.OtherDockPoint == null)
+                            {
+                                result = validTypes.component;
+                                foundEmpty = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            List<Canvas> goodMethods = new List<Canvas>();
+            List<Canvas> previousGoodMethods = null;
+            bool anyNewFlagSet = false;
+
+            while (previousGoodMethods == null || previousGoodMethods.Count != goodMethods.Count || anyNewFlagSet)
+            {
+                anyNewFlagSet = false;
+                previousGoodMethods = goodMethods;
+
+                foreach (var item in usedComponents)
+                {
+                    bool allParamsAreReady = true;
+
+                    foreach (var item2 in item.Children)
+                    {
+                        if (item2 is Ellipse)
+                        {
+                            Ellipse ellipseCast = item2 as Ellipse;
+
+                            DockTag ellipseTag = ellipseCast.Tag as DockTag;
+
+                            if (ellipseTag.IsInput == true)
+                            {
+                                if (ellipseTag.OtherDockPoint != null && !((DockTag)ellipseTag.OtherDockPoint.Tag).IsReady)
+                                {
+                                    allParamsAreReady = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (allParamsAreReady)
+                    {
+                        //Set all Outputs to ready
+                        foreach (var item2 in item.Children)
+                        {
+                            if (item2 is Ellipse)
+                            {
+                                Ellipse ellipseCast = item2 as Ellipse;
+
+                                DockTag ellipseTag = ellipseCast.Tag as DockTag;
+
+                                if (ellipseTag.IsInput == false)
+                                {
+                                    if (ellipseTag.IsReady != true)
+                                    {
+                                        ellipseTag.IsReady = true;
+                                        anyNewFlagSet = true;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!goodMethods.Contains(item))
+                        {
+                            goodMethods.Add(item);
+                        }
+                    }
+                }
+            }
+
+            foreach (var item in usedComponents)
+            {
+                foreach (var item2 in item.Children)
+                {
+                    if (item2 is Ellipse)
+                    {
+                        Ellipse ellipseCast = item2 as Ellipse;
+
+                        DockTag ellipseTag = ellipseCast.Tag as DockTag;
+
+                        if (ellipseTag.IsInput == false)
+                        {
+                            ellipseTag.IsReady = false;
+                        }
+                    }
+                }
+            }
+
+            if (goodMethods.Count != usedComponents.Count)
+            {
+                result = validTypes.none;
+            }
+
+            return result;
+
+        }
+
+        private Component createComponent()
+        {
+            Component creationComponent = new Component();
+            return creationComponent;
+        }
+
+        private enum validTypes
+        {
+            component,
+            componentjob,
+            none
+        }
+
+        private void Button_Check(object sender, RoutedEventArgs e)
+        {
+            var result = GraphisValid();
+
+            switch (result)
+            {
+                case validTypes.component:
+                    MessageBox.Show("Valid component");
+                    break;
+                case validTypes.componentjob:
+                    MessageBox.Show("Valid job");
+                    break;
+                case validTypes.none:
+                    MessageBox.Show("Invalid");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            List<Object> elementsToDelete = new List<Object>();
+
+            foreach (var item in canvas.Children)
+            {
+                elementsToDelete.Add(item);
+            }
+
+            foreach (var item in elementsToDelete)
+            {
+                canvas.Children.Remove(item as UIElement);
+            }
+
+            usedComponents = new List<Canvas>();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (MyEditorClient != null)
+            {
+                MyEditorClient.CloseDown();
+            }
+        }
+
+        private void Disconnect_Click(object sender, RoutedEventArgs e)
+        {
+            if (MyEditorClient != null)
+            {
+                MyEditorClient.CloseDown();
+            }
+
+            btn_disconnect.IsEnabled = false;
+            btn_connect.IsEnabled = true;
         }
     }
 }
