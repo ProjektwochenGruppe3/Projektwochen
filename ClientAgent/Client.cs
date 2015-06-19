@@ -199,6 +199,8 @@ namespace ClientAgent
                 Console.WriteLine("Connected...");
                 this.ClientThread = new Thread(new ThreadStart(SendKeepAliveResponse));
                 this.ClientThread.Start();
+                this.ListenerThread = new Thread(new ThreadStart(ListenerWorker));
+                this.ListenerThread.Start();
             }
             else
             {
