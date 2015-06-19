@@ -1,7 +1,8 @@
 ﻿<Window x:Class="Editor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="900" Width="1600">
+        Title="MainWindow" Height="900" Width="1600"
+        Closing="Window_Closing">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
@@ -35,8 +36,8 @@
                     <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Width="120" HorizontalAlignment="Right" Name="txt_ip"></TextBox>
                     <Label Grid.Row="2">Port</Label>
                     <TextBox Grid.Row="2" Grid.Column="1" Margin="5" Width="50" HorizontalAlignment="Right" Name="txt_port"></TextBox>
-                    <Button Grid.Row="3" Grid.ColumnSpan="2" Width="90" Margin="2.5" HorizontalAlignment="Left" Click="Connect_Click">Connect</Button>
-                    <Button Grid.Row="3" Grid.ColumnSpan="2" Width="90" Margin="2.5" HorizontalAlignment="Right">Disconnect</Button>
+                    <Button Grid.Row="3" Grid.ColumnSpan="2" Width="90" Margin="2.5" HorizontalAlignment="Left" Click="Connect_Click" Name="btn_connect">Connect</Button>
+                    <Button Grid.Row="3" Grid.ColumnSpan="2" Width="90" Margin="2.5" HorizontalAlignment="Right" Click="Disconnect_Click" IsEnabled="False" Name="btn_disconnect">Disconnect</Button>
                 </Grid>
                 <Grid Grid.Row="1" Margin="5">
                     <ListView Name="componentView" Height="500" VerticalAlignment="Top">
@@ -62,7 +63,7 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         
-                        <Button Grid.Row="0" Margin="2" Click="Button_Check">_Überprüfen</Button>
+                        <Button Grid.Row="0" Margin="2" Click="Button_Check">Üb_erprüfen</Button>
                         <Button Grid.Row="1" Margin="2">_Ausführen</Button>
                         <Button Grid.Row="2" Margin="2">_Speichern</Button>
                         <Button Grid.Row="3" Margin="2">S_peichern &amp; Ausführen</Button>
