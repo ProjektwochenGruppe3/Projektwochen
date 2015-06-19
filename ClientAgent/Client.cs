@@ -124,22 +124,64 @@ namespace ClientAgent
                 if (this.Listener.Pending())
                 {
                     Thread DLL_Loading_Thread = new Thread(new ParameterizedThreadStart(DLL_Worker));
-                    DLL_Loading_Thread.Start(this.Listener.AcceptTcpClient());
+                    AtomicJob atjob = new AtomicJob(DLL_Loading_Thread, this.Listener.AcceptTcpClient());
+                    this.TaskList.Add(atjob);
+                    atjob.ExecutableThread.Start(atjob);
                 }
             }
         }
 
-        public void DLL_Worker(object serverRaw)
+        public void DLL_Worker(object atomicJob)
         {
-            TcpClient server = (TcpClient)serverRaw;
-            NetworkStream dllStream = server.GetStream();
-            while (this.Waiting)
+            AtomicJob job = (AtomicJob)atomicJob;
+            ExecutableHandler handler = new ExecutableHandler();
+            NetworkStream dllStream = job.Server.GetStream();
+            string jobDllPath = Environment.CurrentDirectory + "\\Job_Dlls\\" + job.AtJobGuid + ".dll";
+            job.OnExecutableResultsReady += handler.WriteResultToStream;
+            while (job.InProgress)
             {
-                if (dllStream.DataAvailable)
+                try
                 {
-                    object data = Networking.RecievePackage(dllStream);
-                    //AtomicJob job = new AtomicJob(ComponentExecuter.GetAssembly(data));
-                    //this.TaskList.Add(job);
+                    if (dllStream.DataAvailable)
+                    {
+                        object data = Networking.RecievePackage(dllStream);
+                        AgentExecutable exe = data as AgentExecutable;
+                        AgentExecutableParameters para = data as AgentExecutableParameters;
+                        if (exe != null)
+                        {
+                            try
+                            {
+                                handler.WriteToFile(jobDllPath, exe.Assembly);
+                                job.ExecutableType = ComponentExecuter.GetTypeFromAssembly(ComponentExecuter.GetAssemblyFromDll(jobDllPath));
+                            }
+                            catch
+                            {
+                                job.State = Core.Network.JobState.Exception;
+                                job.Result = null;
+                                job.FireOnExecutableResultsReady(dllStream);
+                            }
+                        }
+                        else if (para != null)
+                        {
+                            try
+                            {
+                                job.Params = para.Parameters;
+                                job.Result = ComponentExecuter.InvokeMethod(job);
+                                job.FireOnExecutableResultsReady(dllStream);
+                            }
+                            catch
+                            {
+                                job.State = Core.Network.JobState.Exception;
+                                job.Result = null;
+                                job.FireOnExecutableResultsReady(dllStream);
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    job.InProgress = false;
+                    handler.DeleteFile(jobDllPath);
                 }
             }
         }
