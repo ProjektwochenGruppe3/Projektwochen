@@ -25,6 +25,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.LocalComponents = ServerOperations.GetLocalComponents();
             this.ServerHandler = new ServerHandler();
             this.EditorHander = new EditorHandler(this);
+            this.JobHandler = new JobHandler(this);
         }
 
         public List<Client> Clients { get; set; }
@@ -70,6 +71,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 return clients;
             }
         }
+
+        internal JobHandler JobHandler { get; set; }
 
         private List<Component> LocalComponents { get; set; }
 
