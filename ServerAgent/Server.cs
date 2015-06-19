@@ -128,6 +128,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
             Client client = (Client)args;
             NetworkStream netStream = client.ClientTcp.GetStream();
 
+            this.JobHandler.SendAtomicComponent(null, null);
+
             while (client.ClientAlive)
             {
                 AgentStatus recieved = null;
