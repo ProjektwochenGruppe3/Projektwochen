@@ -1,4 +1,5 @@
 ﻿using Core.Network;
+using EditorNetwork;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,8 @@ namespace Editor
 
         public Line SelectedLine;
 
+        EditorClient MyEditorClient;
+
         private List<Component> serverComponents;
         private List<Canvas> usedComponents;
 
@@ -36,6 +39,10 @@ namespace Editor
         public MainWindow()
         {
             InitializeComponent();
+
+            txt_ip.Text = "192.168.0.1";
+            txt_port.Text = "30000";
+
             serverComponents = new List<Component>();
             usedComponents = new List<Canvas>();
 
@@ -441,10 +448,49 @@ namespace Editor
 
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
-            //IPAddress ip = new IPAddress(txt_ip.Text.ToString());
-            //Guid bla = Guid.NewGuid();
+            IPAddress ip;
+            int port;
 
+            try
+            {
+                ip = IPAddress.Parse(txt_ip.Text.ToString());
+            }
+            catch
+            {
+                MessageBox.Show("Bitte geben Sie eine gültige Ip-Adresse ein!");
+                txt_ip.Text = string.Empty;
+                return;
+            }
+            try
+            {
+                port = Convert.ToInt32(txt_port.Text.ToString());
+            }
+            catch
+            {
+                MessageBox.Show("Bitte geben Sie einen gültigen Port ein!");
+                txt_port.Text = string.Empty;
+                return;
+            }
 
+            if (MyEditorClient != null)
+            {
+                MyEditorClient.CloseDown();
+            }
+
+            try
+            {
+                MyEditorClient = new EditorClient(ip, port);
+                MyEditorClient.ConnecttoServer();
+            }
+            catch
+            {
+                MyEditorClient = null;
+                MessageBox.Show("Verbindung konnte nicht aufgebaut werden");
+                return;
+            }
+
+            btn_disconnect.IsEnabled = true;
+            btn_connect.IsEnabled = false;
         }
 
         private validTypes GraphisValid()
@@ -626,6 +672,25 @@ namespace Editor
             }
 
             usedComponents = new List<Canvas>();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (MyEditorClient != null)
+            {
+                MyEditorClient.CloseDown();
+            }
+        }
+
+        private void Disconnect_Click(object sender, RoutedEventArgs e)
+        {
+            if (MyEditorClient != null)
+            {
+                MyEditorClient.CloseDown();
+            }
+
+            btn_disconnect.IsEnabled = false;
+            btn_connect.IsEnabled = true;
         }
     }
 }
