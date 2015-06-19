@@ -120,5 +120,11 @@ namespace EditorNetwork
             Networking.SendPackage(response, stream);
             this.IsWaiting = false;
         }
+
+        public void CloseDown()
+        {
+            this.TCPClientEditor.GetStream().Close(0);
+            this.TCPClientEditor.Close();
+        }
     }
 }
