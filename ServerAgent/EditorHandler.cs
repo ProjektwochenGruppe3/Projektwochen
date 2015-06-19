@@ -13,39 +13,20 @@ namespace ServerAgent_PW_Josef_Benda_V1
 {
     public class EditorHandler
     {
-        public EditorHandler(List<Component> localcomponents, List<Component> remotecomponents)
+        public EditorHandler(Server server)
         {
             this.ConnectedEditors = new List<Editor>();
-            this.ComponentList = new List<Component>();
-            this.UpdateComponentList(localcomponents, remotecomponents);
-
+            this.Server = server;
             this.Listener = new TcpListener(IPAddress.Any, 30000);
         }
+
+        private Server Server { get; set; }
 
         private List<Editor> ConnectedEditors { get; set; }
 
         private Thread ListenerThread { get; set; }
 
         private TcpListener Listener { get; set; }
-
-        private List<Component> ComponentList { get; set; }
-
-        private List<Tuple<Guid, string>> AvailableClients { get; set; }
-
-        public void UpdateComponentList(List<Component> localcomponents, List<Component> remotecomponents)
-        {
-            this.ComponentList = localcomponents;
-
-            foreach (var item in remotecomponents)
-            {
-                this.ComponentList.Add(item);
-            }
-        }
-
-        public void UpdateClientList()
-        {
-
-        }
 
         private void ListenerWorker()
         {
@@ -72,25 +53,30 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             try
             {
-                Networking.SendPackage(new ServerComponentList(this.ComponentList, this.AvailableClients), ns);
+                Networking.SendPackage(new ServerComponentList(this.Server.AvailableComponents, this.Server.AvailableClients), ns);
             }
             catch
             {
-
+                // TODO
             }
 
 
             while (true)
             {
-                if (ns.DataAvailable)
+                try
                 {
-                    EditorJob job = Networking.RecievePackage(ns) as EditorJob;
-
-                    if (job == null)
+                    if (ns.DataAvailable)
                     {
+                        EditorJob job = Networking.RecievePackage(ns) as EditorJob;
 
+                        if (job != null)
+                        {
+
+                        }
                     }
-
+                }
+                catch
+                {
                     break;
                 }
 

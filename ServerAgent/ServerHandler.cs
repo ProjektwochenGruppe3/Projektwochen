@@ -33,5 +33,20 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             return components;
         }
+
+        public List<ClientInfo> GetRemoteClients()
+        {
+            List<ClientInfo> clients = new List<ClientInfo>();
+
+            foreach (var server in this.RemoteServers)
+            {
+                foreach (var item in server.RemoteClients)
+                {
+                    clients.Add(item);
+                }
+            }
+
+            return clients;
+        }
     }
 }

@@ -42,6 +42,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AgentExecutable.cs" />
+    <Compile Include="AgentExecutableParameters.cs" />
+    <Compile Include="AgentExecutableResult.cs" />
     <Compile Include="AgentStatusRequest.cs" />
     <Compile Include="AgentStatus.cs" />
     <Compile Include="EditorJob.cs" />

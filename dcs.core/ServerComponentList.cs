@@ -7,6 +7,7 @@ using Core.Network;
 
 namespace dcs.core
 {
+    [Serializable]
     public class ServerComponentList
     {
         public ServerComponentList(List<Component> components, List<Tuple<Guid, string>> clients)

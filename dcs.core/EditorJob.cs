@@ -7,6 +7,7 @@ using Core.Network;
 
 namespace dcs.core
 {
+    [Serializable]
     public class EditorJob : JobRequest
     {
         public JobState JobState { get; set; }

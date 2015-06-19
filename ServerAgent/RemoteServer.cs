@@ -9,5 +9,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
     public class RemoteServer
     {
         public List<Component> RemoteComponents { get; set; }
+
+        public List<ClientInfo> RemoteClients { get; set; }
     }
 }
