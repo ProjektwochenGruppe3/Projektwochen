@@ -19,8 +19,8 @@ namespace ClientAgent
                 if (method != null)
                 {
                     object classInstance = Activator.CreateInstance(type, null);
-                    object[] parameters = new object[] {values};
-                    object resultObject = method.Invoke(classInstance,parameters);
+                    object[] parameters = new object[] { values };
+                    object resultObject = method.Invoke(classInstance, parameters);
                     result = (IEnumerable<object>)resultObject;
                 }
                 else
@@ -39,19 +39,25 @@ namespace ClientAgent
         {
             Type returnType = null;
             Type[] objectTypes = asbly.GetTypes();
-            foreach(Type t in objectTypes)
+            int implementedInterfaces = 0;
+            foreach (Type t in objectTypes)
             {
-                if (t.IsInterface)
+                if (t.GetInterface("IComponent", true) != null)
                 {
                     returnType = t;
+                    implementedInterfaces++;
                 }
+            }
+            if (implementedInterfaces != 1)
+            {
+                throw new ExecutableInterfaceProblemException("asbly");
             }
             return returnType;
         }
 
         public static Assembly GetAssemblyFromDll()
         {
-            Assembly asbly = Assembly.LoadFile("C:\\Users\\Josef\\Desktop\\Add.dll");
+            Assembly asbly = Assembly.LoadFile("C:\\Users\\Josef\\Desktop\\Add_Test.dll");
             return asbly;
         }
     }
