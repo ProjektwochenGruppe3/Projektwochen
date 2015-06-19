@@ -74,7 +74,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         internal JobHandler JobHandler { get; set; }
 
-        private List<Component> LocalComponents { get; set; }
+        internal List<Component> LocalComponents { get; set; }
 
         private EditorHandler EditorHander { get; set; }
 
@@ -163,6 +163,21 @@ namespace ServerAgent_PW_Josef_Benda_V1
         //    await Task.Run(() => this.EvaluateKeepAlive(c));
         //}
 
+        internal ClientInfo GetRemoteClient(Guid clientguid)
+        {
+            foreach (var item in this.ServerHandler.RemoteServers)
+            {
+                ClientInfo info = item.RemoteClients.FirstOrDefault(x => x.ClientGuid == clientguid);
+
+                if (info != null)
+                {
+                    return info;
+                }
+            }
+
+            return null;
+        }
+        
         private bool EvaluateKeepAlive(Client c)
         {
             Guid requestguid = this.SendAgentStatusRequest(c);
