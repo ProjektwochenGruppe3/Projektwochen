@@ -50,6 +50,8 @@
     <Compile Include="Client.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="EditorHandler.cs" />
+    <Compile Include="Job.cs" />
+    <Compile Include="JobHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemoteServer.cs" />

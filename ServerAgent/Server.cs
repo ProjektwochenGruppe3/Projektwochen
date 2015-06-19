@@ -24,14 +24,57 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.listenerThread = new Thread(new ThreadStart(ListenerWorker));
             this.LocalComponents = ServerOperations.GetLocalComponents();
             this.ServerHandler = new ServerHandler();
-            this.EditorHander = new EditorHandler(this.LocalComponents, this.ServerHandler.GetRemoteComponents());
+            this.EditorHander = new EditorHandler(this);
+            this.JobHandler = new JobHandler(this);
         }
 
         public List<Client> Clients { get; set; }
 
-        public List<Component> LocalComponents { get; set; }
-
         public bool ServerAlive { get; set; }
+
+        public List<Component> AvailableComponents
+        {
+            get
+            {
+                List<Component> comp = new List<Component>();
+
+                foreach (var item in this.LocalComponents)
+                {
+                    comp.Add(item);
+                }
+
+                foreach (var item in this.ServerHandler.GetRemoteComponents())
+                {
+                    comp.Add(item);
+                }
+
+                return comp;
+            }
+        }
+
+        public List<Tuple<Guid, string>> AvailableClients
+        {
+            get
+            {
+                List<Tuple<Guid, string>> clients = new List<Tuple<Guid, string>>();
+
+                foreach (var item in this.Clients)
+                {
+                    clients.Add(new Tuple<Guid, string>(item.ClientGuid, item.FriendlyName));
+                }
+
+                foreach (var item in this.ServerHandler.GetRemoteClients())
+                {
+                    clients.Add(new Tuple<Guid, string>(item.ClientGuid, item.FriendlyName));
+                }
+
+                return clients;
+            }
+        }
+
+        internal JobHandler JobHandler { get; set; }
+
+        internal List<Component> LocalComponents { get; set; }
 
         private EditorHandler EditorHander { get; set; }
 
@@ -54,42 +97,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.listenerThread.Join();
             this.ServerAlive = false;
         }
-
-        //public async void BroadcastKeepAlive()
-        //{
-        //    List<Task> tasks = new List<Task>();
-
-        //    foreach (Client c in this.Clients)
-        //    {
-        //        tasks.Add(this.KeepAliveWorker(c));
-        //    }
-
-        //    foreach (var item in tasks)
-        //    {
-        //        try
-        //        {
-        //            await item;
-        //        }
-        //        catch
-        //        {
-        //        }                
-        //    }
-
-        //    foreach (var item in this.Clients.Where(x => x.ClientAlive == false))
-        //    {
-        //        this.Clients.Remove(item);
-        //    }
-        //}
-
-        //public void SendToAllOtherClients(Client client, string message)
-        //{
-        //    foreach (Client c in Clients)
-        //    {
-        //        if (c != client)
-        //        {
-        //        }
-        //    }
-        //}
 
         public void ListenerWorker()
         {
@@ -120,6 +127,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             Client client = (Client)args;
             NetworkStream netStream = client.ClientTcp.GetStream();
+
+            this.JobHandler.SendAtomicComponent(null, null);
 
             while (client.ClientAlive)
             {
@@ -156,6 +165,21 @@ namespace ServerAgent_PW_Josef_Benda_V1
         //    await Task.Run(() => this.EvaluateKeepAlive(c));
         //}
 
+        internal ClientInfo GetRemoteClient(Guid clientguid)
+        {
+            foreach (var item in this.ServerHandler.RemoteServers)
+            {
+                ClientInfo info = item.RemoteClients.FirstOrDefault(x => x.ClientGuid == clientguid);
+
+                if (info != null)
+                {
+                    return info;
+                }
+            }
+
+            return null;
+        }
+        
         private bool EvaluateKeepAlive(Client c)
         {
             Guid requestguid = this.SendAgentStatusRequest(c);

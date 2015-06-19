@@ -10,17 +10,17 @@ namespace ClientAgent
 {
     public static class ComponentExecuter
     {
-        public static IEnumerable<object> InvokeMethod(Type type, IEnumerable<object> values)
+        public static IEnumerable<object> InvokeMethod(AtomicJob job)
         {
             IEnumerable<object> result = null;
-            if (type != null)
+            if (job.ExecutableType != null)
             {
-                MethodInfo method = type.GetMethod("Evaluate");
+                MethodInfo method = job.ExecutableType.GetMethod("Evaluate");
                 if (method != null)
                 {
-                    object classInstance = Activator.CreateInstance(type, null);
-                    object[] parameters = new object[] {values};
-                    object resultObject = method.Invoke(classInstance,parameters);
+                    object classInstance = Activator.CreateInstance(job.ExecutableType, null);
+                    object[] parameters = new object[] { job.Params };
+                    object resultObject = method.Invoke(classInstance, parameters);
                     result = (IEnumerable<object>)resultObject;
                 }
                 else
@@ -39,19 +39,25 @@ namespace ClientAgent
         {
             Type returnType = null;
             Type[] objectTypes = asbly.GetTypes();
-            foreach(Type t in objectTypes)
+            int implementedInterfaces = 0;
+            foreach (Type t in objectTypes)
             {
-                if (t.IsInterface)
+                if (t.GetInterface("IComponent", true) != null)
                 {
                     returnType = t;
+                    implementedInterfaces++;
                 }
+            }
+            if (implementedInterfaces != 1)
+            {
+                throw new ExecutableInterfaceProblemException("asbly");
             }
             return returnType;
         }
 
-        public static Assembly GetAssemblyFromDll()
+        public static Assembly GetAssemblyFromDll(string path)
         {
-            Assembly asbly = Assembly.LoadFile("C:\\Users\\Josef\\Desktop\\Add.dll");
+            Assembly asbly = Assembly.LoadFile(path);
             return asbly;
         }
     }

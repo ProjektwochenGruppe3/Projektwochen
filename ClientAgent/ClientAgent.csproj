@@ -52,6 +52,13 @@
     <Compile Include="ComponentExecuter.cs" />
     <Compile Include="CPU_Diagnostic.cs" />
     <Compile Include="AtomicJob.cs" />
+    <Compile Include="ExceptionHandler.cs" />
+    <Compile Include="ExecutableFailedException.cs" />
+    <Compile Include="ExecutableHandler.cs" />
+    <Compile Include="ExecutableInterfaceProblemException.cs" />
+    <Compile Include="ExecutableReadyEventArgs.cs" />
+    <Compile Include="OnExecutableFailedEventArgs.cs" />
+    <Compile Include="OnExecutableInterfaceProblemEventArgs.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

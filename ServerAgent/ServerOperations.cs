@@ -12,6 +12,35 @@ namespace ServerAgent_PW_Josef_Benda_V1
 {
     public static class ServerOperations
     {
+        internal static byte[] GetComponentBytes(Guid compguid)
+        {
+            string path = Path.Combine(Environment.CurrentDirectory, "Components");
+
+            foreach (var item in Directory.GetFiles(path, "*.dll"))
+            {
+                try
+                {
+                    Assembly ass = Assembly.LoadFile(item);
+
+                    Type[] types = ass.GetTypes().Where(x => x.IsDefined(typeof(IComponent))).ToArray();
+
+                    foreach (var type in types)
+                    {
+                        var instance = Activator.CreateInstance(type) as IComponent;
+                        
+                        if (instance.ComponentGuid == compguid)
+                        {
+                            return File.ReadAllBytes(ass.Location);
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return null;
+        }
 
         internal static List<Component> GetLocalComponents()
         {

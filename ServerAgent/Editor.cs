@@ -16,8 +16,18 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.EditorThread = thread;
         }
 
+        public event EventHandler EditorDisconnected;
+
         public TcpClient TcpClient { get; set; }
 
         public Thread EditorThread { get; set; }
+
+        public void OnEditorDisconnected()
+        {
+            if (this.EditorDisconnected != null)
+            {
+                this.EditorDisconnected(this, new EventArgs());
+            }
+        }
     }
 }

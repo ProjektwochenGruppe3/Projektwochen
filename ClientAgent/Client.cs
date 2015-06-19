@@ -22,6 +22,7 @@ namespace ClientAgent
             this.Listener = new TcpListener(IPAddress.Any, 47474);
             this.timer = new System.Timers.Timer();
             this.timer.AutoReset = true;
+            this.TaskList = new List<AtomicJob>();
             CPU_Diagnostic.InitialisierePerformanceCounter();
             this.Connect();
         }
@@ -69,7 +70,7 @@ namespace ClientAgent
                 {
                     AgentStatus response = new AgentStatus(this.firstKeepAliveGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
                     Networking.SendPackage(response, netStream);
-                    Thread.Sleep(3000);
+                    Thread.Sleep(5000);
                 }
             }
             catch
@@ -89,28 +90,23 @@ namespace ClientAgent
                 {
                     if (netStream == null)
                     {
-                        Console.WriteLine("Trying to connect...");
                         this.ClientTCP.Connect(IPAddress.Parse(this.ipAdress), this.port);
                         netStream = this.ClientTCP.GetStream();
                     }
                     else if (netStream.DataAvailable)
                     {
-                        Console.WriteLine("Data available...");
                         object receivedObj = Networking.RecievePackage(netStream);
-                        Console.WriteLine("Data received...");
                         AgentStatusRequest request = (AgentStatusRequest)receivedObj;
                         this.firstKeepAliveGuid = request.KeepAliveRequestGuid;
                         this.MyName = request.KeepAliveRequestGuid.ToString() + "_Agent";
                         AgentStatus response = new AgentStatus(request.KeepAliveRequestGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
                         Networking.SendPackage(response, netStream);
-                        Console.WriteLine("Data sent...");
                         this.Waiting = false;
                         this.State = ClientState.connected;
                     }
                 }
                 catch
                 {
-                    Console.WriteLine("Connection Failed!");
                 }
 
                 Thread.Sleep(10);
@@ -124,23 +120,66 @@ namespace ClientAgent
                 if (this.Listener.Pending())
                 {
                     Thread DLL_Loading_Thread = new Thread(new ParameterizedThreadStart(DLL_Worker));
-                    DLL_Loading_Thread.Start(this.Listener.AcceptTcpClient());
+                    AtomicJob atjob = new AtomicJob(DLL_Loading_Thread, this.Listener.AcceptTcpClient());
+                    this.TaskList.Add(atjob);
+                    atjob.ExecutableThread.Start(atjob);
                 }
             }
         }
 
-        public void DLL_Worker(object serverRaw)
+        public void DLL_Worker(object atomicJob)
         {
-            TcpClient server = (TcpClient)serverRaw;
-            NetworkStream dllStream = server.GetStream();
-            while (this.Waiting)
+            AtomicJob job = (AtomicJob)atomicJob;
+            ExecutableHandler handler = new ExecutableHandler();
+            NetworkStream dllStream = job.Server.GetStream();
+            string jobDllPath = Environment.CurrentDirectory + job.AtJobGuid + ".dll";
+            job.OnExecutableResultsReady += handler.WriteResultToStream;
+            while (job.InProgress)
             {
-                if (dllStream.DataAvailable)
+                try
                 {
-                    object data = Networking.RecievePackage(dllStream);
-                    //AtomicJob job = new AtomicJob(ComponentExecuter.GetAssembly(data));
-                    //this.TaskList.Add(job);
+                    if (dllStream.DataAvailable)
+                    {
+                        object data = Networking.RecievePackage(dllStream);
+                        AgentExecutable exe = data as AgentExecutable;
+                        AgentExecutableParameters para = data as AgentExecutableParameters;
+                        if (exe != null)
+                        {
+                            try
+                            {
+                                handler.WriteToFile(jobDllPath, exe.Assembly);
+                                job.ExecutableType = ComponentExecuter.GetTypeFromAssembly(ComponentExecuter.GetAssemblyFromDll(jobDllPath));
+                            }
+                            catch
+                            {
+                                job.State = Core.Network.JobState.Exception;
+                                job.Result = null;
+                                job.FireOnExecutableResultsReady(dllStream);
+                            }
+                        }
+                        else if (para != null)
+                        {
+                            try
+                            {
+                                job.Params = para.Parameters;
+                                job.Result = ComponentExecuter.InvokeMethod(job);
+                                job.FireOnExecutableResultsReady(dllStream);
+                            }
+                            catch
+                            {
+                                job.State = Core.Network.JobState.Exception;
+                                job.Result = null;
+                                job.FireOnExecutableResultsReady(dllStream);
+                            }
+                        }
+                    }
                 }
+                catch
+                {
+                    job.InProgress = false;
+                    handler.DeleteFile(jobDllPath);
+                }
+                Thread.Sleep(50);
             }
         }
 
@@ -152,17 +191,22 @@ namespace ClientAgent
             this.State = ClientState.connecting;
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = 60000;
+            Console.WriteLine("Trying to connect...");
             this.ClientThread = new Thread(new ThreadStart(FirstConnect));
             this.ClientThread.Start();
             this.ClientThread.Join();
             if (this.State == ClientState.connected)
             {
+                Console.WriteLine("Connected...");
                 this.ClientThread = new Thread(new ThreadStart(SendKeepAliveResponse));
                 this.ClientThread.Start();
+                this.Listener.Start();
+                this.ListenerActive = true;
+                this.ListenerThread = new Thread(new ThreadStart(ListenerWorker));
+                this.ListenerThread.Start();
             }
             else
             {
-                Console.WriteLine("Error: Connection timer ran out!");
             }
         }
 
