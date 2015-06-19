@@ -183,6 +183,7 @@ namespace ClientAgent
                     job.InProgress = false;
                     handler.DeleteFile(jobDllPath);
                 }
+                Thread.Sleep(50);
             }
         }
 
