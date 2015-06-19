@@ -125,6 +125,7 @@ namespace ClientAgent
                 {
                     Thread DLL_Loading_Thread = new Thread(new ParameterizedThreadStart(DLL_Worker));
                     AtomicJob atjob = new AtomicJob(DLL_Loading_Thread, this.Listener.AcceptTcpClient());
+                    this.TaskList.Add(atjob);
                     atjob.ExecutableThread.Start(atjob);
                 }
             }
@@ -135,7 +136,7 @@ namespace ClientAgent
             AtomicJob job = (AtomicJob)atomicJob;
             ExecutableHandler handler = new ExecutableHandler();
             NetworkStream dllStream = job.Server.GetStream();
-            string jobDllPath = Environment.CurrentDirectory + "\\Job_Dlls\\" + job.AtJobGuid;
+            string jobDllPath = Environment.CurrentDirectory + "\\Job_Dlls\\" + job.AtJobGuid + ".dll";
             job.OnExecutableResultsReady += handler.WriteResultToStream;
             while (job.InProgress)
             {
@@ -180,6 +181,7 @@ namespace ClientAgent
                 catch
                 {
                     job.InProgress = false;
+                    handler.DeleteFile(jobDllPath);
                 }
             }
         }
