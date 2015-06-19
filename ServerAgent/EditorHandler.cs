@@ -38,6 +38,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 Thread neweditorThread = new Thread(new ParameterizedThreadStart(EditorWorker));
                 Editor editor = new Editor(neweditorTcp, neweditorThread);
                 this.ConnectedEditors.Add(editor);
+                editor.EditorDisconnected += this.OnEditorDisconnected;
                 neweditorThread.Start(editor);
 
                 Console.WriteLine("Editor connected");
@@ -57,9 +58,9 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
             catch
             {
-                // TODO
+                editor.OnEditorDisconnected();
+                return;
             }
-
 
             while (true)
             {
@@ -71,17 +72,25 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
                         if (job != null)
                         {
-
+                            this.Server.JobHandler.NewJob(job);
                         }
                     }
                 }
                 catch
                 {
+                    editor.OnEditorDisconnected();
                     break;
                 }
 
                 Thread.Sleep(10);
             }
+        }
+
+        private void OnEditorDisconnected(object sender, EventArgs e)
+        {
+            Editor editor = sender as Editor;
+
+            this.ConnectedEditors.Remove(editor);
         }
     }
 }

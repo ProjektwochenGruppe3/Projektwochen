@@ -10,6 +10,6 @@ namespace dcs.core
     [Serializable]
     public class EditorJob : JobRequest
     {
-        public JobState JobState { get; set; }
+        public JobAction JobAction { get; set; }
     }
 }
