@@ -89,28 +89,23 @@ namespace ClientAgent
                 {
                     if (netStream == null)
                     {
-                        Console.WriteLine("Trying to connect...");
                         this.ClientTCP.Connect(IPAddress.Parse(this.ipAdress), this.port);
                         netStream = this.ClientTCP.GetStream();
                     }
                     else if (netStream.DataAvailable)
                     {
-                        Console.WriteLine("Data available...");
                         object receivedObj = Networking.RecievePackage(netStream);
-                        Console.WriteLine("Data received...");
                         AgentStatusRequest request = (AgentStatusRequest)receivedObj;
                         this.firstKeepAliveGuid = request.KeepAliveRequestGuid;
                         this.MyName = request.KeepAliveRequestGuid.ToString() + "_Agent";
                         AgentStatus response = new AgentStatus(request.KeepAliveRequestGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
                         Networking.SendPackage(response, netStream);
-                        Console.WriteLine("Data sent...");
                         this.Waiting = false;
                         this.State = ClientState.connected;
                     }
                 }
                 catch
                 {
-                    Console.WriteLine("Connection Failed!");
                 }
 
                 Thread.Sleep(10);
@@ -195,17 +190,18 @@ namespace ClientAgent
             this.State = ClientState.connecting;
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = 60000;
+            Console.WriteLine("Trying to connect...");
             this.ClientThread = new Thread(new ThreadStart(FirstConnect));
             this.ClientThread.Start();
             this.ClientThread.Join();
             if (this.State == ClientState.connected)
             {
+                Console.WriteLine("Connected...");
                 this.ClientThread = new Thread(new ThreadStart(SendKeepAliveResponse));
                 this.ClientThread.Start();
             }
             else
             {
-                Console.WriteLine("Error: Connection timer ran out!");
             }
         }
 
