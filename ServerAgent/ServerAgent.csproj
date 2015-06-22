@@ -50,6 +50,7 @@
     <Compile Include="Client.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="EditorHandler.cs" />
+    <Compile Include="InternalNode.cs" />
     <Compile Include="Job.cs" />
     <Compile Include="JobHandler.cs" />
     <Compile Include="Program.cs" />
