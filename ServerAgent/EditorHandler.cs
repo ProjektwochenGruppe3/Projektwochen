@@ -72,7 +72,15 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
                         if (job != null)
                         {
-                            Thread t = new Thread(new ParameterizedThreadStart(this.Server.JobHandler.NewJob));
+                            List<Component> components = new List<Component>();
+
+                            foreach (var item in this.Server.AvailableComponents)
+                            {
+                                components.Add(item);
+                            }
+
+                            JobHandler handler = new JobHandler(this.Server, components);
+                            Thread t = new Thread(new ParameterizedThreadStart(handler.NewJob));
                             t.IsBackground = true;
                             t.Start(job);
                         }
