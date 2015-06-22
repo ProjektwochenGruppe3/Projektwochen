@@ -16,5 +16,6 @@ namespace Editor
         public Ellipse OtherDockPoint { get; set; }
         public bool IsReady { get; set; }
         public Guid Guid { get; set; }
+        public uint ParamPosition { get; set; }
     }
 }

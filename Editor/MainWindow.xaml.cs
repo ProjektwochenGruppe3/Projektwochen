@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using dcs.core;
 
 namespace Editor
 {
@@ -50,30 +51,36 @@ namespace Editor
             testComponent.FriendlyName = "Start";
             testComponent.InputHints = new List<string>() { };
             testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+
             serverComponents.Add(testComponent);
 
             var ohneInput = new Component();
             ohneInput.FriendlyName = "End";
             ohneInput.InputHints = new List<string>() { "string" };
             ohneInput.OutputHints = new List<string>() { };
+            ohneInput.ComponentGuid = Guid.NewGuid();
             serverComponents.Add(ohneInput);
 
             testComponent = new Component();
             testComponent.FriendlyName = "Simple String";
             testComponent.InputHints = new List<string>() { "string" };
             testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
             serverComponents.Add(testComponent);
 
             testComponent = new Component();
             testComponent.FriendlyName = "Other";
             testComponent.InputHints = new List<string>() { "string", "string", "string" };
             testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
             serverComponents.Add(testComponent);
 
             testComponent = new Component();
             testComponent.FriendlyName = "Test2";
             testComponent.InputHints = new List<string>() { "string" };
             testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
             serverComponents.Add(testComponent);
 
 
@@ -219,6 +226,7 @@ namespace Editor
                 dockHelper.IsInput = false;
                 dockHelper.OtherDockPoint = null;
                 dockHelper.Guid = Guid.NewGuid();
+                dockHelper.ParamPosition = (uint)i + 1;
                 dockHelper.DataType = toAdd.OutputHints.ToList()[i].ToString();
                 dockPointOutput.Tag = dockHelper;
 
@@ -263,6 +271,7 @@ namespace Editor
                 dockHelper.IsInput = true;
                 dockHelper.OtherDockPoint = null;
                 dockHelper.Guid = Guid.NewGuid();
+                dockHelper.ParamPosition = (uint)i + 1;
                 dockHelper.DataType = toAdd.InputHints.ToList()[i].ToString();
                 dockPointInput.Tag = dockHelper;
 
@@ -481,6 +490,9 @@ namespace Editor
             {
                 MyEditorClient = new EditorClient(ip, port);
                 MyEditorClient.ConnecttoServer();
+                var serverComponentList = MyEditorClient.GetComponent();
+                serverComponents = serverComponentList.ComponentList;
+   
             }
             catch
             {
@@ -692,5 +704,109 @@ namespace Editor
             btn_disconnect.IsEnabled = false;
             btn_connect.IsEnabled = true;
         }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            switch (GraphisValid())
+            {
+                case validTypes.none:
+                    MessageBox.Show("Graph is not valid.");
+                    return;
+                default:
+                    break;
+            }
+
+            Create_Component();
+        }
+
+        private Component Create_Component()
+        {
+            Component result = new Component();
+            List<ComponentEdge> edges = new List<ComponentEdge>();
+
+            List<string> inputHints = new List<string>();
+            List<string> outputHints = new List<string>();
+
+            foreach (var item in canvas.Children)
+            {
+                if (item is Canvas)
+                {
+                    var method = item as Canvas;
+
+                    foreach (var item2 in method.Children)
+                    {
+                        if (item2 is Ellipse)
+                        {
+                            var dockPoint = item2 as Ellipse;
+                            var myDockTag = (DockTag)dockPoint.Tag;
+                            ComponentEdge myEdge = new ComponentEdge();
+
+                            if (myDockTag.IsInput)
+                            {
+                                if (myDockTag.OtherDockPoint == null)
+                                {
+                                    myEdge.InputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                    myEdge.OutputComponentGuid = Guid.Empty;
+                                    myEdge.InternalInputComponentGuid = myDockTag.Guid;
+                                    myEdge.InternalOutputComponentGuid = Guid.Empty;
+                                    myEdge.InputValueID = myDockTag.ParamPosition;
+                                    inputHints.Add(myDockTag.DataType);
+                                    myEdge.OutputValueID = (uint)inputHints.Count;
+                                }
+                                else
+                                {
+                                    myEdge.InputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                    myEdge.OutputComponentGuid = ((Component)((Canvas)myDockTag.OtherDockPoint.Parent).Tag).ComponentGuid;
+                                    myEdge.InternalInputComponentGuid = myDockTag.Guid;
+                                    myEdge.InternalOutputComponentGuid = ((DockTag)myDockTag.OtherDockPoint.Tag).Guid;
+                                    myEdge.InputValueID = myDockTag.ParamPosition;
+                                    myEdge.OutputValueID = ((DockTag)myDockTag.OtherDockPoint.Tag).ParamPosition;
+                                }
+                            }
+                            else
+                            {
+                                if (myDockTag.OtherDockPoint == null)
+                                {
+                                    myEdge.OutputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                    myEdge.InputComponentGuid = Guid.Empty;
+                                    myEdge.InternalOutputComponentGuid = myDockTag.Guid;
+                                    myEdge.InternalInputComponentGuid = Guid.Empty;
+                                    myEdge.OutputValueID = myDockTag.ParamPosition;
+                                    outputHints.Add(myDockTag.DataType);
+                                    myEdge.InputValueID = (uint)outputHints.Count;
+                                }
+                                else
+                                {
+                                    myEdge.OutputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                    myEdge.InputComponentGuid = ((Component)((Canvas)myDockTag.OtherDockPoint.Parent).Tag).ComponentGuid;
+                                    myEdge.InternalOutputComponentGuid = myDockTag.Guid;
+                                    myEdge.InternalInputComponentGuid = ((DockTag)myDockTag.OtherDockPoint.Tag).Guid;
+                                    myEdge.OutputValueID = myDockTag.ParamPosition;
+                                    myEdge.InputValueID = ((DockTag)myDockTag.OtherDockPoint.Tag).ParamPosition;
+                                }
+                            }
+
+                            if (!edges.Any(e => e.InternalInputComponentGuid == myEdge.InternalInputComponentGuid && e.InternalOutputComponentGuid == myEdge.InternalOutputComponentGuid))
+                            {
+                                edges.Add(myEdge);
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            result.ComponentGuid = Guid.NewGuid();
+            result.Edges = edges;
+            result.InputHints = inputHints;
+            result.OutputHints = outputHints;
+            result.IsAtomic = false;
+            result.FriendlyName = "NewComponent";
+            result.InputDescriptions = new List<string>();
+            result.OutputDescriptions = new List<string>();
+            return result;
+        }
+
+
     }
 }
