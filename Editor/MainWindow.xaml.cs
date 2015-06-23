@@ -529,6 +529,9 @@ namespace Editor
             btn_execute.IsEnabled = true;
             btn_executesave.IsEnabled = true;
             btn_save.IsEnabled = true;
+
+            lbl_name.IsEnabled = true;
+            txt_name.IsEnabled = true;
         }
 
         private validTypes GraphisValid()
@@ -733,11 +736,32 @@ namespace Editor
             btn_execute.IsEnabled = false;
             btn_save.IsEnabled = false;
             btn_executesave.IsEnabled = false;
+
+            lbl_name.IsEnabled = false;
+            txt_name.IsEnabled = false;
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            if (txt_name.Text == string.Empty)
+            {
+                MessageBox.Show("Bitte geben Sie einen Namen für Ihre Komponente ein");
+                txt_name.Focus();
+                return;
+            }
+
+            switch (GraphisValid())
+            {
+                case validTypes.none:
+                    MessageBox.Show("Die Komponente ist nicht gültig.");
+                    return;
+                default:
+                    break;
+            }
+
             var job = Create_Job();
+
+
 
             if (job == null)
             {
@@ -746,21 +770,13 @@ namespace Editor
             else
             {
                 job.JobAction = JobAction.Save;
+                job.FriendlyName = txt_name.Text;
                 Send_Job(job);
             }
         }
 
         private EditorJob Create_Job()
         {
-            switch (GraphisValid())
-            {
-                case validTypes.none:
-                    MessageBox.Show("Die Komponente ist nicht gültig.");
-                    return null;
-                default:
-                    break;
-            }
-
             var component = Create_Component();
 
             EditorJob job = new EditorJob();
@@ -885,6 +901,25 @@ namespace Editor
 
         private void ExecuteSave_Click(object sender, RoutedEventArgs e)
         {
+            if (txt_name.Text == string.Empty)
+            {
+                MessageBox.Show("Bitte geben Sie einen Namen für Ihre Komponente ein");
+                txt_name.Focus();
+                return;
+            }
+
+            switch (GraphisValid())
+            {
+                case validTypes.none:
+                    MessageBox.Show("Die Komponente ist nicht gültig.");
+                    return;
+                case validTypes.component:
+                    MessageBox.Show("Die Komponente ist kein gültiger Job.");
+                    return;
+                default:
+                    break;
+            }
+
             var job = Create_Job();
 
             if (job == null)
@@ -900,6 +935,25 @@ namespace Editor
 
         private void Execute_Click(object sender, RoutedEventArgs e)
         {
+            if (txt_name.Text == string.Empty)
+            {
+                MessageBox.Show("Bitte geben Sie einen Namen für Ihre Komponente ein");
+                txt_name.Focus();
+                return;
+            }
+
+            switch (GraphisValid())
+            {
+                case validTypes.none:
+                    MessageBox.Show("Die Komponente ist nicht gültig.");
+                    return;
+                case validTypes.component:
+                    MessageBox.Show("Die Komponente ist kein gültiger Job.");
+                    return;
+                default:
+                    break;
+            }
+
             var job = Create_Job();
 
             if (job == null)

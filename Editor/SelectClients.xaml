@@ -1,12 +1,19 @@
 ﻿<Window x:Class="Editor.SelectClients"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SelectClients" Height="300" Width="300">
+        Title="Rechner auswählen" Height="240" Width="400">
     <Grid>
-        <ComboBox Height="20" Name="cb_selectCalcClient">
-            <ListView>
-                
-            </ListView>
-        </ComboBox>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Margin="5 5 5 0">Auf welchem Rechner soll die Berechnung durchgeführt werden?</Label>
+        <ComboBox Height="20" Grid.Row="1" Name="cb_selectCalcClient" Margin="5 0 5 5"/>
+        <Label Grid.Row="2" Margin="5 5 5 0">Auf welchem Rechner soll die Ausgabe erfolgen?</Label>
+        <ComboBox Height="20" Grid.Row="3" Name="cb_selectDisplayClient" Margin="5 0 5 5"/>
+        <Button Grid.Row="4" Margin="100 20 100 20" Height="40">Bestätigen</Button>
     </Grid>
 </Window>

@@ -26,12 +26,21 @@ namespace Editor
             this.myMainWindow = mainWindow;
 
             InitializeComponent();
-            var bla = new int();
+
+            cb_selectCalcClient.Items.Add("Dem Server überlassen (Standard)");
+            cb_selectDisplayClient.Items.Add("Dem Server überlassen (Standard)");
 
             foreach (var item in myMainWindow.Clients)
             {
-                cb_selectCalcClient.Items.Add(item.Item2);
+                cb_selectCalcClient.Items.Add(item.Item1 + " " + item.Item2);
+                cb_selectDisplayClient.Items.Add(item.Item1 + " " + item.Item2);
             }
+
+            cb_selectCalcClient.FontFamily = new FontFamily("Consolas");
+            cb_selectCalcClient.SelectedIndex = 0;
+
+            cb_selectDisplayClient.FontFamily = new FontFamily("Consolas");
+            cb_selectDisplayClient.SelectedIndex = 0;
         }
     }
 }
