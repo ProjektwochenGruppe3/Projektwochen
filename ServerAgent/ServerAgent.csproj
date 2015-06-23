@@ -47,6 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionCompletedEventArgs.cs" />
+    <Compile Include="AgentWorker.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="EditorHandler.cs" />

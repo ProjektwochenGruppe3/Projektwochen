@@ -24,6 +24,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
         /// </summary>
         public List<Guid> TargetGuids { get; set; }
 
+        public List<uint> TargetPorts { get; set; }
+
         /// <summary>
         /// Gets or sets the input parameters for the target component.
         /// </summary>
