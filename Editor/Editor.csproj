@@ -59,6 +59,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="SelectClients.xaml.cs">
+      <DependentUpon>SelectClients.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -73,6 +76,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="SelectClients.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -102,6 +109,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\dcs.core\dcs.core.csproj">
+      <Project>{dae141be-c792-4119-a222-504605cc8f0d}</Project>
+      <Name>dcs.core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EditorClientNetwork\EditorClientNetwork.csproj">
       <Project>{cba96517-5cb9-4c21-bfce-25ffbd96d568}</Project>
       <Name>EditorClientNetwork</Name>
