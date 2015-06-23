@@ -1,0 +1,12 @@
+﻿<Window x:Class="Editor.SelectClients"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SelectClients" Height="300" Width="300">
+    <Grid>
+        <ComboBox Height="20" Name="cb_selectCalcClient">
+            <ListView>
+                
+            </ListView>
+        </ComboBox>
+    </Grid>
+</Window>
