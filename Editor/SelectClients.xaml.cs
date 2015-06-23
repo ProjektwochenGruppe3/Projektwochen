@@ -26,6 +26,7 @@ namespace Editor
             this.myMainWindow = mainWindow;
 
             InitializeComponent();
+            var bla = new int();
 
             foreach (var item in myMainWindow.Clients)
             {
