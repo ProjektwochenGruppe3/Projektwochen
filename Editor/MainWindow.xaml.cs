@@ -64,7 +64,7 @@ namespace Editor
 
             EditorGuid = Guid.NewGuid();
 
-            txt_ip.Text = "127.0.0.1";
+            txt_ip.Text = "10.13.52.57";
             txt_port.Text = "30000";
 
             serverComponents = new List<Component>();
@@ -510,10 +510,10 @@ namespace Editor
                 Clients = serverComponentList.AvailableClients;
    
             }
-            catch
+            catch (Exception ex)
             {
                 MyEditorClient = null;
-                MessageBox.Show("Verbindung konnte nicht aufgebaut werden");
+                MessageBox.Show("Verbindung konnte nicht aufgebaut werden" + ex.Message);
                 return;
             }
 
