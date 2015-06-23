@@ -70,49 +70,43 @@ namespace Editor
             serverComponents = new List<Component>();
             usedComponents = new List<Canvas>();
 
-            var testComponent = new Component();
-            testComponent.FriendlyName = "Start";
-            testComponent.InputHints = new List<string>() { };
-            testComponent.OutputHints = new List<string>() { "string" };
-            testComponent.ComponentGuid = Guid.NewGuid();
+            //var testComponent = new Component();
+            //testComponent.FriendlyName = "Start";
+            //testComponent.InputHints = new List<string>() { };
+            //testComponent.OutputHints = new List<string>() { "string" };
+            //testComponent.ComponentGuid = Guid.NewGuid();
 
-            serverComponents.Add(testComponent);
+            //serverComponents.Add(testComponent);
 
-            var ohneInput = new Component();
-            ohneInput.FriendlyName = "End";
-            ohneInput.InputHints = new List<string>() { "string" };
-            ohneInput.OutputHints = new List<string>() { };
-            ohneInput.ComponentGuid = Guid.NewGuid();
-            serverComponents.Add(ohneInput);
+            //var ohneInput = new Component();
+            //ohneInput.FriendlyName = "End";
+            //ohneInput.InputHints = new List<string>() { "string" };
+            //ohneInput.OutputHints = new List<string>() { };
+            //ohneInput.ComponentGuid = Guid.NewGuid();
+            //serverComponents.Add(ohneInput);
 
-            testComponent = new Component();
-            testComponent.FriendlyName = "Simple String";
-            testComponent.InputHints = new List<string>() { "string" };
-            testComponent.OutputHints = new List<string>() { "string" };
-            testComponent.ComponentGuid = Guid.NewGuid();
-            serverComponents.Add(testComponent);
+            //testComponent = new Component();
+            //testComponent.FriendlyName = "Simple String";
+            //testComponent.InputHints = new List<string>() { "string" };
+            //testComponent.OutputHints = new List<string>() { "string" };
+            //testComponent.ComponentGuid = Guid.NewGuid();
+            //serverComponents.Add(testComponent);
 
-            testComponent = new Component();
-            testComponent.FriendlyName = "Other";
-            testComponent.InputHints = new List<string>() { "string", "string", "string" };
-            testComponent.OutputHints = new List<string>() { "string" };
-            testComponent.ComponentGuid = Guid.NewGuid();
-            serverComponents.Add(testComponent);
+            //testComponent = new Component();
+            //testComponent.FriendlyName = "Other";
+            //testComponent.InputHints = new List<string>() { "string", "string", "string" };
+            //testComponent.OutputHints = new List<string>() { "string" };
+            //testComponent.ComponentGuid = Guid.NewGuid();
+            //serverComponents.Add(testComponent);
 
-            testComponent = new Component();
-            testComponent.FriendlyName = "Test2";
-            testComponent.InputHints = new List<string>() { "string" };
-            testComponent.OutputHints = new List<string>() { "string" };
-            testComponent.ComponentGuid = Guid.NewGuid();
-            serverComponents.Add(testComponent);
+            //testComponent = new Component();
+            //testComponent.FriendlyName = "Test2";
+            //testComponent.InputHints = new List<string>() { "string" };
+            //testComponent.OutputHints = new List<string>() { "string" };
+            //testComponent.ComponentGuid = Guid.NewGuid();
+            //serverComponents.Add(testComponent);
 
-            foreach (var item in serverComponents)
-            {
-                Label componentLabel = new Label();
-                componentLabel.Content = item.FriendlyName;
-                componentLabel.Tag = item;
-                componentView.Items.Add(componentLabel);
-            }
+
         }
 
         private void ListViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -521,6 +515,14 @@ namespace Editor
                 MyEditorClient = null;
                 MessageBox.Show("Verbindung konnte nicht aufgebaut werden");
                 return;
+            }
+
+            foreach (var item in serverComponents)
+            {
+                Label componentLabel = new Label();
+                componentLabel.Content = item.FriendlyName;
+                componentLabel.Tag = item;
+                componentView.Items.Add(componentLabel);
             }
 
             btn_disconnect.IsEnabled = true;
