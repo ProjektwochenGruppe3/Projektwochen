@@ -17,7 +17,8 @@ namespace EditorNetwork
         {
             this.IpAddress = ip;
             this.Port = port;
-            this.TCPClientEditor = new TcpClient(new IPEndPoint(this.IpAddress, this.Port));
+            this.TCPClientEditor = new TcpClient();
+            //this.TCPClientEditor = new TcpClient(new IPEndPoint(this.IpAddress, this.Port));
             this.IsWaiting = false;
             this.IsAlive = false;
             this.State = ClientState.Disconnected;
@@ -126,7 +127,7 @@ namespace EditorNetwork
 
         public void CloseDown()
         {
-            this.TCPClientEditor.GetStream().Close(0);
+            this.TCPClientEditor.GetStream().Close();
             this.TCPClientEditor.Close();
         }
     }
