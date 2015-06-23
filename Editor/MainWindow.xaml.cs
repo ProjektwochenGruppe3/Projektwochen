@@ -64,7 +64,7 @@ namespace Editor
 
             EditorGuid = Guid.NewGuid();
 
-            txt_ip.Text = "192.168.0.1";
+            txt_ip.Text = "127.0.0.1";
             txt_port.Text = "30000";
 
             serverComponents = new List<Component>();

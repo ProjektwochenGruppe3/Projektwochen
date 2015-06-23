@@ -18,6 +18,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.ConnectedEditors = new List<Editor>();
             this.Server = server;
             this.Listener = new TcpListener(IPAddress.Any, 30000);
+            this.ListenerThread = new Thread(new ThreadStart(this.ListenerWorker));
+            this.ListenerThread.Start();
         }
 
         private Server Server { get; set; }

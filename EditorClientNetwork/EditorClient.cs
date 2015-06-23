@@ -58,6 +58,7 @@ namespace EditorNetwork
                         this.State = ClientState.Connected;
                         this.IsAlive = true;
                         this.IsWaiting = true;
+                        break;
                     }
                     else
                     {
