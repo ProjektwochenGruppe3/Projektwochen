@@ -43,13 +43,20 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             Networking.SendPackage(package, ns);
 
-            while (this.InputParameters == null)
+            if (this.Action.NodeInputGuids.Count() == 0)
             {
-                if (this.InputParameters != null && this.Action.NodeInputGuids.Count() == this.InputParameters.Count())
+                Networking.SendPackage(new AgentExecutableParameters(new List<object>()), ns);
+            }
+            else
+            {
+                while (this.InputParameters == null)
                 {
-                    AgentExecutableParameters paramameters = new AgentExecutableParameters(this.InputParameters);
+                    if (this.InputParameters != null && this.Action.NodeInputGuids.Count() == this.InputParameters.Count())
+                    {
+                        AgentExecutableParameters paramameters = new AgentExecutableParameters(this.InputParameters);
 
-                    Networking.SendPackage(paramameters, ns);
+                        Networking.SendPackage(paramameters, ns);
+                    }
                 }
             }
 

@@ -42,7 +42,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 {
                     Assembly ass = Assembly.LoadFile(item);
 
-                    Type[] types = ass.GetTypes().Where(x => x.IsDefined(typeof(IComponent))).ToArray();
+                    Type[] types = ass.GetTypes().Where(x => x.GetInterface("IComponent", true) != null).ToArray();
 
                     foreach (var type in types)
                     {
@@ -79,12 +79,9 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 {
                     Assembly ass = Assembly.LoadFile(item);
 
-                    if (ass.IsDefined(typeof(IComponent)))
+                    foreach (var comp in ServerOperations.ConvertToComponent(ass))
                     {
-                        foreach (var comp in ServerOperations.ConvertToComponent(ass))
-                        {
-                            components.Add(comp);
-                        }
+                        components.Add(comp);
                     }
                 }
                 catch
@@ -116,7 +113,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             try
             {
-                types = assembly.GetTypes().Where(x => x.IsDefined(typeof(IComponent))).ToArray();
+                types = assembly.GetTypes().Where(x => x.GetInterface("IComponent", true) != null).ToArray();
             }
             catch
             {

@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Timers;
 using dcs.core;
+using System.IO;
 
 namespace ClientAgent
 {
@@ -132,7 +133,7 @@ namespace ClientAgent
             AtomicJob job = (AtomicJob)atomicJob;
             ExecutableHandler handler = new ExecutableHandler();
             NetworkStream dllStream = job.Server.GetStream();
-            string jobDllPath = Environment.CurrentDirectory + job.AtJobGuid + ".dll";
+            string jobDllPath = Path.Combine(Environment.CurrentDirectory, job.AtJobGuid.ToString() + ".dll");
             job.OnExecutableResultsReady += handler.WriteResultToStream;
             while (job.InProgress)
             {
@@ -150,10 +151,10 @@ namespace ClientAgent
                                 handler.WriteToFile(jobDllPath, exe.Assembly);
                                 job.ExecutableType = ComponentExecuter.GetTypeFromAssembly(ComponentExecuter.GetAssemblyFromDll(jobDllPath));
                             }
-                            catch
+                            catch (Exception e)
                             {
                                 job.State = Core.Network.JobState.Exception;
-                                job.Result = null;
+                                job.Result = new List<string>() { e.Message };
                                 job.FireOnExecutableResultsReady(dllStream);
                             }
                         }
@@ -165,10 +166,10 @@ namespace ClientAgent
                                 job.Result = ComponentExecuter.InvokeMethod(job);
                                 job.FireOnExecutableResultsReady(dllStream);
                             }
-                            catch
+                            catch (Exception e)
                             {
                                 job.State = Core.Network.JobState.Exception;
-                                job.Result = null;
+                                job.Result = new List<string>() { e.Message };
                                 job.FireOnExecutableResultsReady(dllStream);
                             }
                         }

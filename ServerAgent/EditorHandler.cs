@@ -45,7 +45,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
                 Console.WriteLine("Editor connected");
 
-                Thread.Sleep(10);
+                Thread.Sleep(50);
             }
         }
 

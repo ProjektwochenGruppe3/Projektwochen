@@ -18,7 +18,7 @@ namespace ClientAgent
         {
             this.ExecutableThread = thread;
             this.Server = server;
-            this.AtJobGuid = new Guid();
+            this.AtJobGuid = Guid.NewGuid();
             this.InProgress = true;
         }
 
