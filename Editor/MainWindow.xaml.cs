@@ -24,22 +24,45 @@ namespace Editor
     /// </summary>
     public partial class MainWindow : Window
     {
-        public Canvas SelectedMethod;
+        private Canvas SelectedMethod;
 
-        public Point MousePosition;
+        private Point MousePosition;
 
-        public Line SelectedLine;
+        private Line SelectedLine;
 
-        EditorClient MyEditorClient;
+        private EditorClient MyEditorClient;
+
+        private Guid EditorGuid;
+
+        public List<Tuple<Guid, string>> Clients;
 
         private List<Component> serverComponents;
+
         private List<Canvas> usedComponents;
+
 
         private int radius = 10;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            Clients = new List<Tuple<Guid, string>>();
+
+            var tupel0 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 1");
+            var tupel1 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 2");
+            var tupel2 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 3");
+            var tupel3 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 4");
+
+            Clients.Add(tupel0);
+            Clients.Add(tupel1);
+            Clients.Add(tupel2);
+            Clients.Add(tupel3);
+
+            SelectClients window = new SelectClients(this);
+            window.Show();
+
+            EditorGuid = Guid.NewGuid();
 
             txt_ip.Text = "192.168.0.1";
             txt_port.Text = "30000";
@@ -82,8 +105,6 @@ namespace Editor
             testComponent.OutputHints = new List<string>() { "string" };
             testComponent.ComponentGuid = Guid.NewGuid();
             serverComponents.Add(testComponent);
-
-
 
             foreach (var item in serverComponents)
             {
@@ -492,6 +513,7 @@ namespace Editor
                 MyEditorClient.ConnecttoServer();
                 var serverComponentList = MyEditorClient.GetComponent();
                 serverComponents = serverComponentList.ComponentList;
+                Clients = serverComponentList.AvailableClients;
    
             }
             catch
@@ -503,6 +525,10 @@ namespace Editor
 
             btn_disconnect.IsEnabled = true;
             btn_connect.IsEnabled = false;
+
+            btn_execute.IsEnabled = true;
+            btn_executesave.IsEnabled = true;
+            btn_save.IsEnabled = true;
         }
 
         private validTypes GraphisValid()
@@ -703,20 +729,70 @@ namespace Editor
 
             btn_disconnect.IsEnabled = false;
             btn_connect.IsEnabled = true;
+
+            btn_execute.IsEnabled = false;
+            btn_save.IsEnabled = false;
+            btn_executesave.IsEnabled = false;
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            var job = Create_Job();
+
+            if (job == null)
+            {
+                return;
+            }
+            else
+            {
+                job.JobAction = JobAction.Save;
+                Send_Job(job);
+            }
+        }
+
+        private EditorJob Create_Job()
+        {
             switch (GraphisValid())
             {
                 case validTypes.none:
-                    MessageBox.Show("Graph is not valid.");
-                    return;
+                    MessageBox.Show("Die Komponente ist nicht gültig.");
+                    return null;
                 default:
                     break;
             }
 
-            Create_Component();
+            var component = Create_Component();
+
+            EditorJob job = new EditorJob();
+            job.HopCount = 0;
+            job.JobComponent = component;
+            job.JobRequestGuid = Guid.NewGuid();
+            job.InputData = new List<object>();
+
+            job.JobSourceClientGuid = EditorGuid;
+            job.TargetCalcClientGuid = null;
+            job.TargetDisplayClient = null;
+
+            return job;
+        }
+
+        private void Send_Job(EditorJob job)
+        {
+            if (MyEditorClient != null)
+            {
+                try
+                {
+                    MyEditorClient.SendJobRequest(job);
+                }
+                catch
+                {
+                    MessageBox.Show("Der Job konnte nicht gespeichert werden");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Der Job konnte nicht gespeichert werden");
+            }
         }
 
         private Component Create_Component()
@@ -807,6 +883,34 @@ namespace Editor
             return result;
         }
 
+        private void ExecuteSave_Click(object sender, RoutedEventArgs e)
+        {
+            var job = Create_Job();
 
+            if (job == null)
+            {
+                return;
+            }
+            else
+            {
+                job.JobAction = JobAction.SaveAndExecute;
+                Send_Job(job);
+            }
+        }
+
+        private void Execute_Click(object sender, RoutedEventArgs e)
+        {
+            var job = Create_Job();
+
+            if (job == null)
+            {
+                return;
+            }
+            else
+            {
+                job.JobAction = JobAction.Execute;
+                Send_Job(job);
+            }
+        }
     }
 }
