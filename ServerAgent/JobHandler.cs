@@ -12,22 +12,27 @@ namespace ServerAgent_PW_Josef_Benda_V1
 {
     public class JobHandler
     {
-        public JobHandler(Server server, List<Component> avComp)
+        public JobHandler(Server server, List<Component> localComp, List<Component> availableComp, List<Client> agents)
         {
             this.Server = server;
             this.AtomicComponents = new List<Component>();
             this.AvailableComponents = avComp;
-            this.JobParts = new List<Component>();
             this.JobParts = null;
+            this.LocalComponents = localComp;
+            this.LocalAgents = agents;
         }
 
-        public event EventHandler JobDone;
+        public event EventHandler ActionDone;
 
         private Server Server { get; set; }
 
         private List<Component> AtomicComponents { get; set; }
 
         private List<Component> AvailableComponents { get; set; }
+
+        private List<Component> LocalComponents { get; set; }
+
+        private List<Client> LocalAgents { get; set; }
 
         private List<InternalNode> JobParts { get; set; }
 
@@ -55,16 +60,32 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             this.AnalyzeComponent(request.JobComponent);
 
-            // TODO
-            // Target & CalcClient GUID GUID UGIDGUAWIpegjöl
+            Tuple<ClientInfo, bool> calc = this.FindClient(request.TargetCalcClientGuid);
+            Tuple<ClientInfo, bool> display = this.FindClient(request.TargetDisplayClient);
+
+            if (!calc.Item2)
+            {
+                // TODO redirect to server
+            }
+
+            foreach (var item in this.JobParts.Where(x => !this.LocalComponents.Contains(x.Component)))
+            {
+                // REQUEST COMPONENT FROM OTHER SERVER
+            }
+
+            List<Tuple<Client, List<InternalNode>>> clientWorkLoad = new List<Tuple<Client, List<InternalNode>>>();
 
 
-            Component comp = this.Server.LocalComponents.FirstOrDefault(x => x.ComponentGuid == request.JobComponent.ComponentGuid);
+            Parallel.ForEach(this.JobParts, (x) =>
+                {
+                    TcpClient client = new TcpClient();
+                    client.Connect(new IPEndPoint(), 47474);
+                });
 
             // Not null, if component exists locally
             if (comp != null)
             {
-                ClientInfo info = this.FindTargetClient(request);
+                ClientInfo info = this.FindClient(request);
 
                 this.SendAtomicComponent(request, info);
             }
@@ -114,17 +135,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
-        private void SplitComponent(Component component)
-        {
-            if (component.IsAtomic)
-            {
-                this.AtomicComponents.Add(component);
-                return;
-            }
-
-
-        }
-
         public void DebugSendAtomicComponent(JobRequest request, ClientInfo info)
         {
             //byte[] comp = ServerOperations.GetComponentBytes(request.JobComponent.ComponentGuid);
@@ -159,35 +169,39 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         }
 
-        private ClientInfo FindTargetClient(JobRequest request)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientguid"></param>
+        /// <returns>A tuple containing a client info object and a bool indicating whether the found client is within the local network. Returns NULL if the client was found.</returns>
+        private Tuple<ClientInfo, bool> FindClient(Guid? clientguid)
         {
-            if (request.TargetCalcClientGuid != null && request.TargetCalcClientGuid != Guid.Empty)
+            // Checks if TargetCalcClient is SET
+            if (clientguid != null && clientguid != Guid.Empty)
             {
                 // Checks if client exits in the global network
-                Tuple<Guid, string> clienttuple = this.Server.AvailableClients.FirstOrDefault(x => x.Item1 == request.TargetCalcClientGuid);
+                Tuple<Guid, string> clienttuple = this.Server.AvailableClients.FirstOrDefault(x => x.Item1 == clientguid);
 
                 if (clienttuple != null)
                 {
-                    Client client = this.Server.Clients.FirstOrDefault(x => x.ClientGuid == request.TargetCalcClientGuid);
+                    Client client = this.Server.Clients.FirstOrDefault(x => x.ClientGuid == clientguid);
 
                     // Not null, if client is in internal network (connected to this server)
                     if (client != null)
                     {
                         IPEndPoint endpt = client.ClientTcp.Client.RemoteEndPoint as IPEndPoint;
                         IPAddress ip = endpt.Address;
-                        return new ClientInfo() { ClientGuid = client.ClientGuid, FriendlyName = client.FriendlyName, IpAddress = ip };
+                        return new Tuple<ClientInfo, bool>(new ClientInfo() { ClientGuid = client.ClientGuid, FriendlyName = client.FriendlyName, IpAddress = ip }, true);
                     }
                     else
                     {
-                        return this.Server.GetRemoteClient((Guid)request.TargetCalcClientGuid);
+                        ClientInfo ci = this.Server.GetRemoteClient(clientguid);
+                        return new Tuple<ClientInfo, bool>(ci, false);
                     }
-                }
-                else
-                {
-                    // FIND LOWEST USAGE
                 }
             }
 
+            // Nothing was found: returns null
             return null;
         }
 
