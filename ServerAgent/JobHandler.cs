@@ -16,10 +16,11 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             this.Server = server;
             this.AtomicComponents = new List<Component>();
-            this.AvailableComponents = avComp;
+            this.AvailableComponents = availableComp;
             this.JobParts = null;
             this.LocalComponents = localComp;
             this.LocalAgents = agents;
+            this.AgentWorkers = new List<AgentWorker>();
         }
 
         public event EventHandler ActionDone;
@@ -35,6 +36,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
         private List<Client> LocalAgents { get; set; }
 
         private List<InternalNode> JobParts { get; set; }
+
+        private List<AgentWorker> AgentWorkers { get; set; }
 
         public void NewJob(object jobobj)
         {
@@ -73,25 +76,12 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 // REQUEST COMPONENT FROM OTHER SERVER
             }
 
-            List<Tuple<Client, List<InternalNode>>> clientWorkLoad = new List<Tuple<Client, List<InternalNode>>>();
+            this.CreateClientWorkLoads();
 
-
-            Parallel.ForEach(this.JobParts, (x) =>
-                {
-                    TcpClient client = new TcpClient();
-                    client.Connect(new IPEndPoint(), 47474);
-                });
-
-            // Not null, if component exists locally
-            if (comp != null)
+            foreach (var item in this.AgentWorkers)
             {
-                ClientInfo info = this.FindClient(request);
-
-                this.SendAtomicComponent(request, info);
-            }
-            else
-            {
-                // Server handler request component
+                item.ActionCompleted += this.OnActionCompleted;
+                item.StartWorker();
             }
         }
 
@@ -112,8 +102,10 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     node = new InternalNode();
                     node.NodeInputGuids = new List<Guid>();
                     node.TargetGuids = new List<Guid>();
+                    node.TargetPorts = new List<uint>();
                     node.NodeInputGuids.Add(item.InternalInputComponentGuid);
                     node.TargetGuids.Add(item.InternalOutputComponentGuid);
+                    node.TargetPorts.Add(item.OutputValueID);
                     node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.InputComponentGuid);
                     node.InputParametersForTarget = new List<object>();
 
@@ -160,15 +152,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
-        private void SendAtomicComponent(JobRequest request, ClientInfo info)
-        {
-            //byte[] comp = ServerOperations.GetComponentBytes(request.JobComponent.ComponentGuid);
-            byte[] comp = System.IO.File.ReadAllBytes(System.IO.Path.Combine(Environment.CurrentDirectory, "Components", "ConsoleInput.dll"));
-            AgentExecutable package = new AgentExecutable(comp);
-
-
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -195,7 +178,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     }
                     else
                     {
-                        ClientInfo ci = this.Server.GetRemoteClient(clientguid);
+                        ClientInfo ci = this.Server.GetRemoteClient((Guid)clientguid);
                         return new Tuple<ClientInfo, bool>(ci, false);
                     }
                 }
@@ -219,6 +202,39 @@ namespace ServerAgent_PW_Josef_Benda_V1
             req.TargetDisplayClient = job.TargetDisplayClient;
 
             return req;
+        }
+
+        private void CreateClientWorkLoads()
+        {
+            for (int i = 0; i < this.JobParts.Count(); i++)
+            {
+                IPAddress address = ((IPEndPoint)(this.LocalAgents[i % this.LocalAgents.Count()].ClientTcp.Client.RemoteEndPoint)).Address;
+
+                this.AgentWorkers.Add(new AgentWorker(address, this.JobParts[i]));
+            }
+        }
+
+        private void OnActionCompleted(object sender, ActionCompletedEventArgs e)
+        {
+            AgentWorker worker = (AgentWorker)sender;
+            this.AgentWorkers.Remove(worker);
+
+            object[] results = e.Result.Results.ToArray();
+
+            if (e.Result.JobState == JobState.ComponentCompleted)
+            {
+                    InternalNode action = worker.Action;
+
+                    for (int i = 0; i < results.Count(); i++)
+                    {
+                        InternalNode nextaction = this.JobParts.FirstOrDefault(x => x.NodeInputGuids.Contains(action.TargetGuids[i]));
+
+                        if (nextaction != null)
+                        {
+                            nextaction.InputParametersForTarget[(int)action.TargetPorts[i]] = results[i];
+                        }
+                    }
+            }
         }
     }
 }
