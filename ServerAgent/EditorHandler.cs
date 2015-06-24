@@ -80,7 +80,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
                             {
                                 components.Add(item);
                             }
-
                             List<Component> locals = this.Server.LocalComponents.ToList();
                             List<Client> agents = this.Server.Clients.ToList();
 

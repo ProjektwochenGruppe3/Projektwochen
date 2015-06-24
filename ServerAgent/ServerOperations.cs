@@ -93,13 +93,14 @@ namespace ServerAgent_PW_Josef_Benda_V1
             {
                 try
                 {
-                    using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (FileStream fs = new FileStream(item, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         components.Add(ServerOperations.formatter.Deserialize(fs) as Component);
                     }
                 }
-                catch
+                catch(Exception e)
                 {
+                    Console.WriteLine(e.Message);
                 }
             }
 
