@@ -29,6 +29,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
         /// <summary>
         /// Gets or sets the input parameters for the target component.
         /// </summary>
-        public List<object> InputParametersForTarget { get; set; }
+        public List<object> InputParameters { get; set; }
     }
 }
