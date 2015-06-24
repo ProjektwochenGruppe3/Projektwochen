@@ -53,13 +53,13 @@ namespace Editor
 
             EditorGuid = Guid.NewGuid();
 
-            txt_ip.Text = "10.13.51.58";
+            txt_ip.Text = "10.101.150.24";
             txt_port.Text = "30000";
 
             serverComponents = new List<Component>();
             usedComponents = new List<Canvas>();
 
-            FillWithTestComponents();
+            //FillWithTestComponents();
             //FillWithTestClients();
         }
 
@@ -778,10 +778,10 @@ namespace Editor
         {
             validTypes result = validTypes.componentjob;
 
-            if (usedComponents.Count <= 1)
-            {
-                return validTypes.none;
-            }
+            //if (usedComponents.Count <= 1)
+            //{
+            //    return validTypes.none;
+            //}
 
             // Check if there is an open end - if there is one - it is a a component in the best case
             bool foundEmpty = false;
@@ -1018,6 +1018,13 @@ namespace Editor
                 job.FriendlyName = txt_name.Text;
                 job.JobComponent.FriendlyName = txt_name.Text;
                 Send_Job(job);
+
+                if (MyEditorClient != null)
+                {
+                    Thread.Sleep(200);
+                    Disconnect_Click(null, null);
+                    Connect_Click(null, null);
+                }   
             }
         }
 
@@ -1195,6 +1202,7 @@ namespace Editor
             {
                 MessageBox.Show("Konnte nicht zum Server gesendet werden.");
             }
+
             CurrentJob = null;
         }
 
