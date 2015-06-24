@@ -127,6 +127,7 @@ namespace ClientAgent
                 if (this.Listener.Pending())
                 {
                     Thread executionThread = new Thread(new ThreadStart(ExecutionWorker));
+                    executionThread.Start();
                     Thread DLL_Loading_Thread = new Thread(new ParameterizedThreadStart(DLL_Worker));
                     AtomicJob atjob = new AtomicJob(DLL_Loading_Thread, this.Listener.AcceptTcpClient());
                     this.TaskList.Add(atjob);
@@ -167,11 +168,10 @@ namespace ClientAgent
                                 job.FireOnExecutableResultsReady(dllStream);
                             }
                         }
-                        else if (para != null || !inExecutableList)
+                        else if (para != null && !inExecutableList)
                         {
-                            this.ExecutableJobs.Add(job);
-                            int jobIndex = this.ExecutableJobs.IndexOf(job);
                             job.Params = para.Parameters;
+                            this.ExecutableJobs.Add(job);
                         }
                     }
                 }
@@ -195,14 +195,17 @@ namespace ClientAgent
                         this.ExecutableJobs[0].Result = ComponentExecuter.InvokeMethod(this.ExecutableJobs[0]);
                         this.ExecutableJobs[0].State = Core.Network.JobState.Ok;
                         this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
+                        this.ExecutableJobs.Remove(this.ExecutableJobs[0]);
                     }
                     catch (Exception e)
                     {
                         this.ExecutableJobs[0].State = Core.Network.JobState.Exception;
                         this.ExecutableJobs[0].Result = new List<string>() { e.Message };
                         this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
+                        this.ExecutableJobs.Remove(this.ExecutableJobs[0]);
                     }
                 }
+                Thread.Sleep(50);
             }
         }
 
