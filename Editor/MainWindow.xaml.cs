@@ -59,8 +59,8 @@ namespace Editor
             serverComponents = new List<Component>();
             usedComponents = new List<Canvas>();
 
-            //FillWithTestComponents();
-            //FillWithTestClients();
+            FillWithTestComponents();
+            FillWithTestClients();
         }
 
         private void FillWithTestComponents()
@@ -219,6 +219,7 @@ namespace Editor
             methodLabel.Content = toAdd.FriendlyName;
             methodLabel.Width = width;
             methodLabel.FontWeight = FontWeights.Bold;
+            methodLabel.ToolTip = toAdd.FriendlyName + "\r\n" + toAdd.ComponentGuid.ToString();
             methodLabel.ToolTip = toAdd.FriendlyName;
             newMethod.Children.Add(methodLabel);
             Canvas.SetLeft(methodLabel, boxLeftPosition);
@@ -875,6 +876,7 @@ namespace Editor
             {
                 job.JobAction = JobAction.Save;
                 job.FriendlyName = txt_name.Text;
+                job.JobComponent.FriendlyName = txt_name.Text;
                 Send_Job(job);
             }
         }
@@ -1036,7 +1038,8 @@ namespace Editor
                 job.JobAction = JobAction.SaveAndExecute;
                 CurrentJob = job;
 
-                Send_Job(job);
+                SelectClients window = new SelectClients(this);
+                window.ShowDialog();
             }
         }
 
@@ -1081,7 +1084,15 @@ namespace Editor
                 CurrentJob = job;
 
                 SelectClients window = new SelectClients(this);
-                window.Show();
+                window.ShowDialog();
+            }
+        }
+
+        private void SetInputDescriptions()
+        {
+            foreach (var item in usedComponents)
+            {
+                
             }
         }
     }
