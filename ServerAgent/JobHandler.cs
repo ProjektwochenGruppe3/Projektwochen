@@ -112,7 +112,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     node.TargetPorts.Add(item.OutputValueID);
                     node.TargetGuids.Add(item.InternalInputComponentGuid);
                     node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.OutputComponentGuid);
-                    node.InputParametersForTarget = new List<object>();
+                    node.InputParameters = new List<object>();
 
                     this.JobParts.Add(node);
                 }
@@ -134,15 +134,17 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     node.NodeInputGuids = new List<Guid>();
                     node.TargetGuids = new List<Guid>();
                     node.TargetPorts = new List<uint>();
-                    node.NodeInputGuids.Add(item.InternalOutputComponentGuid);
+                    node.NodeInputGuids.Add(item.InternalInputComponentGuid);
                     node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.InputComponentGuid);
-                    node.InputParametersForTarget = new List<object>();
+                    node.InputParameters = new List<object>();
+                    node.InputParameters.Add(null);
 
                     this.JobParts.Add(node);
                 }
                 else
                 {
-                    node.NodeInputGuids.Add(item.InternalOutputComponentGuid);
+                    node.NodeInputGuids.Add(item.InternalInputComponentGuid);
+                    node.InputParameters.Add(null);
                 }
             }
 
@@ -247,12 +249,16 @@ namespace ServerAgent_PW_Josef_Benda_V1
             AgentWorker worker = (AgentWorker)sender;
             this.AgentWorkers.Remove(worker);
 
-
-            if (e.Result.JobState == JobState.ComponentCompleted)
+            if (e.Result.JobState == JobState.Ok)
             {
-                object[] results = e.Result.Results.ToArray();
-
                 InternalNode action = worker.Action;
+
+                if (action.TargetGuids.Count() == 0)
+                {
+                    return;
+                }
+
+                object[] results = e.Result.Results.ToArray();
 
                 for (int i = 0; i < results.Count(); i++)
                 {
@@ -260,7 +266,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
                     if (nextaction != null)
                     {
-                        nextaction.InputParametersForTarget[(int)action.TargetPorts[i]] = results[i];
+                        nextaction.InputParameters[(int)action.TargetPorts[i] - 1] = results[i];
                     }
                 }
             }

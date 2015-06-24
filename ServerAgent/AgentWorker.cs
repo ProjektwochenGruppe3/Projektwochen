@@ -24,8 +24,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         public InternalNode Action { get; set; }
 
-        public IEnumerable<object> InputParameters { get; set; }
-
         public void StartWorker()
         {
             Thread t = new Thread(new ThreadStart(Worker));
@@ -49,14 +47,19 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
             else
             {
-                while (this.InputParameters == null)
+                while (true)
                 {
-                    if (this.InputParameters != null && this.Action.NodeInputGuids.Count() == this.InputParameters.Count())
+                    int missingArgsCount = this.Action.InputParameters.Where(x => x == null).Count();
+
+                    if (missingArgsCount == 0)
                     {
-                        AgentExecutableParameters paramameters = new AgentExecutableParameters(this.InputParameters);
+                        AgentExecutableParameters paramameters = new AgentExecutableParameters(this.Action.InputParameters);
 
                         Networking.SendPackage(paramameters, ns);
+                        break;
                     }
+
+                    Thread.Sleep(42);
                 }
             }
 
