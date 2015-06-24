@@ -132,6 +132,10 @@ namespace EditorNetwork
                 this.TCPClientEditor.GetStream().Close();
                 this.TCPClientEditor.Close();
             }
+            catch
+            {
+                //Nothing
+            }
         }
     }
 }
