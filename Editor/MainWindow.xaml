@@ -9,9 +9,11 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="1">
-            <Canvas Name="canvas" MouseUp="canvas_MouseUp" MouseDown="canvas_MouseDown" MouseMove="canvas_MouseMove" Margin="5" Background="Transparent" Width="1370" ClipToBounds="True">
-                <Canvas></Canvas>
-            </Canvas>
+            <ScrollViewer Margin="5" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible">
+                <Canvas Name="canvas" MouseUp="canvas_MouseUp" MouseDown="canvas_MouseDown" MouseMove="canvas_MouseMove" Background="Transparent" Height="10000" Width="10000">
+                    <Canvas></Canvas>
+                </Canvas>
+            </ScrollViewer>
         </Grid>
         <Grid Grid.Column="0">
             <Grid>
@@ -42,9 +44,9 @@
                 <Grid Grid.Row="1" Margin="5">
                     <ListView Name="componentView" Height="500" VerticalAlignment="Top">
                         <ListView.View>
-                        <GridView>
+                            <GridView>
                                 <GridViewColumn>Component</GridViewColumn>
-                        </GridView>
+                            </GridView>
                         </ListView.View>
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
