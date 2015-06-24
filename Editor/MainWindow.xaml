@@ -69,7 +69,7 @@
 
                         <Button Grid.Row="0" Margin="2" Click="Clear_Click">_Zeichenbereich zurücksetzen</Button>
                         <Button Grid.Row="1" Margin="2" Click="Button_Check">Üb_erprüfen</Button>
-                        <Button Grid.Row="2" Margin="2" IsEnabled="True" Name="btn_execute" Click="Execute_Click">_Ausführen</Button>
+                        <Button Grid.Row="2" Margin="2" IsEnabled="False" Name="btn_execute" Click="Execute_Click">_Ausführen</Button>
                         <Label Grid.Row="3" Margin="2 2 2 0" Name="lbl_name" IsEnabled="False" HorizontalAlignment="Center" Height="25">Name der neue Komponente</Label>
                         <TextBox Grid.Row="4" Margin="10 0 10 2" Height="20px" Name="txt_name" IsEnabled="False"></TextBox>
                         <Button Grid.Row="5" Margin="2" Click="Save_Click" IsEnabled="False" Name="btn_save">_Speichern</Button>
