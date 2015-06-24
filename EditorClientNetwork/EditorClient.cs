@@ -127,8 +127,11 @@ namespace EditorNetwork
 
         public void CloseDown()
         {
-            this.TCPClientEditor.GetStream().Close();
-            this.TCPClientEditor.Close();
+            try
+            {
+                this.TCPClientEditor.GetStream().Close();
+                this.TCPClientEditor.Close();
+            }
         }
     }
 }
