@@ -17,7 +17,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         internal static void SaveComponent(Component component)
         {
-            string path = Path.Combine(Environment.CurrentDirectory, "Components", component.ComponentGuid.ToString(), ".comp");
+            string path = Path.Combine(Environment.CurrentDirectory, "Components", component.ComponentGuid.ToString() + ".comp");
 
             try
             {
