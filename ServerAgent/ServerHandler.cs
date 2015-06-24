@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Network;
+using dcs.core;
 
 namespace ServerAgent_PW_Josef_Benda_V1
 {
@@ -73,8 +74,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
             {
                 TcpClient newServer = this.Listener.AcceptTcpClient();
 
-
-                
+                Thread t = new Thread(new ParameterizedThreadStart(this.RequestWorker));
+                t.Start(newServer);
 
                 Thread.Sleep(100);
             }
@@ -85,8 +86,10 @@ namespace ServerAgent_PW_Josef_Benda_V1
             // 10001 UDP
         }
 
-        private void RequestWorker(TcpClient newServer)
+        private void RequestWorker(object serverTcp)
         {
+            TcpClient newServer = (TcpClient)serverTcp;
+
             NetworkStream ns = newServer.GetStream();
 
             while (true)
@@ -95,7 +98,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 {
                     if (ns.DataAvailable)
                     {
-                        
+                        Networking.RecieveServerPackage(ns);
                     }
                 }
                 catch

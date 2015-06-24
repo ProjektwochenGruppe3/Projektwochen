@@ -86,7 +86,7 @@ namespace dcs.core
             }
         }
 
-        public static void SendPackage(ServerPackage pack, NetworkStream stream)
+        public static void SendServerPackage(ServerPackage pack, NetworkStream stream)
         {
             byte[] data = Encoding.UTF8.GetBytes(pack.Payload);
 

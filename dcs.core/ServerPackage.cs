@@ -9,7 +9,7 @@ namespace dcs.core
 {
     public class ServerPackage
     {
-        public ServerPackage(MessageCode code, object payload)
+        public ServerPackage(MessageCode code, string payload)
         {
             this.MessageCode = code;
             this.Payload = payload;
