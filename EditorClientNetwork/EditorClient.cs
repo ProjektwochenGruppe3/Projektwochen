@@ -68,7 +68,7 @@ namespace EditorNetwork
 
                 }
 
-                catch (Exception e)
+                catch (Exception)
                 {
                     this.State = ClientState.Disconnected;
                     Thread.Sleep(60);

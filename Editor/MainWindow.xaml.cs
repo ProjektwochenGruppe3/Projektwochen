@@ -889,6 +889,7 @@ namespace Editor
             job.InputData = new List<object>();
 
             job.JobSourceClientGuid = EditorGuid;
+            job.JobGuid = Guid.NewGuid();
             job.TargetCalcClientGuid = null;
             job.TargetDisplayClient = null;
 
