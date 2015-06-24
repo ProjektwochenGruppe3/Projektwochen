@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using dcs.core;
+using System.Threading;
 
 namespace Editor
 {
@@ -40,6 +41,7 @@ namespace Editor
 
         private List<Canvas> usedComponents;
 
+        public object Locker;
 
         private int radius = 10;
 
@@ -47,6 +49,7 @@ namespace Editor
         {
             InitializeComponent();
 
+            Locker = new object();
             Clients = new List<Tuple<Guid, string>>();
 
             var tupel0 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 1");
@@ -70,7 +73,7 @@ namespace Editor
             serverComponents = new List<Component>();
             usedComponents = new List<Canvas>();
 
-            FillWithTestComponents();
+            //FillWithTestComponents();
         }
 
 
@@ -80,6 +83,7 @@ namespace Editor
             testComponent.FriendlyName = "Start";
             testComponent.InputHints = new List<string>() { };
             testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.OutputDescriptions = new List<string>() { "Gibt einen sau geilen string zurück yo" };
             testComponent.ComponentGuid = Guid.NewGuid();
 
             serverComponents.Add(testComponent);
@@ -134,7 +138,7 @@ namespace Editor
 
         private void MouseDownObject(object sender, MouseButtonEventArgs e)
         {
-            if (e.RightButton == MouseButtonState.Pressed && e.LeftButton != MouseButtonState.Pressed)
+            if (e.RightButton == MouseButtonState.Pressed && e.LeftButton != MouseButtonState.Pressed && e.ClickCount == 1)
             {
                 SelectedMethod = sender as Canvas;
                 var x1 = e.GetPosition(canvas).X;
@@ -146,11 +150,48 @@ namespace Editor
                 MousePosition.X = x1 - x2;
                 MousePosition.Y = y1 - y2;
             }
+            else if (e.LeftButton == MouseButtonState.Pressed && e.RightButton != MouseButtonState.Pressed && e.ClickCount == 2)
+            {
+                deleteCanvas(sender as Canvas);
+            }
+        }
+
+        private void deleteCanvas(Canvas method)
+        {
+            foreach (var item in method.Children)
+            {
+                if (item is Ellipse)
+                {
+                    var dockPoint = item as Ellipse;
+                    var dockTag = dockPoint.Tag as DockTag;
+
+                    if (dockTag.DockLine != null)
+                    {
+                        if (dockTag.OtherDockPoint != null)
+                        {
+                            if (dockTag.OtherDockPoint.Tag != null)
+                            {
+                                (dockTag.DockLine.Parent as Canvas).Children.Remove(dockTag.DockLine);
+                                (dockTag.OtherDockPoint.Tag as DockTag).OtherDockPoint = null;
+                                (dockTag.OtherDockPoint.Tag as DockTag).DockLine = null;
+                            }
+                        }
+                    }
+                }
+            }
+
+            canvas.Children.Remove(method);
         }
 
         private void canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            SelectedMethod = null;
+            if (SelectedMethod != null)
+            {
+                var index = usedComponents.IndexOf(SelectedMethod);
+                SelectedMethod = null;
+                FixPosition(usedComponents[index]);
+            }
+
             if (SelectedLine != null && SelectedLine.Parent != null)
             {
                 (SelectedLine.Parent as Canvas).Children.Remove(SelectedLine);
@@ -224,7 +265,15 @@ namespace Editor
                 methodLabel.BorderBrush = new SolidColorBrush(Colors.Black);
                 methodLabel.FontWeight = FontWeights.Bold;
                 newMethod.Children.Add(methodLabel);
-                methodLabel.ToolTip = toAdd.OutputHints.ToList()[i].ToString();
+                if (toAdd.OutputDescriptions == null || toAdd.OutputDescriptions.Count() - 1 < i)
+                {
+                    methodLabel.ToolTip = toAdd.OutputHints.ToList()[i].ToString();
+                }
+                else
+                {
+                    methodLabel.ToolTip = toAdd.OutputHints.ToList()[i].ToString() + "\r\n" + toAdd.OutputDescriptions.ToList()[i].ToString();
+
+                }
                 Canvas.SetLeft(methodLabel, boxLeftPosition + methodBox.Width);
                 Canvas.SetTop(methodLabel, k);
 
@@ -381,7 +430,6 @@ namespace Editor
                 dockPoint.Tag = dockHelper;
 
                 SelectedLine = null;
-
             }
         }
 
@@ -442,6 +490,37 @@ namespace Editor
             }
         }
 
+        private void FixPosition(Canvas method)
+        {
+            if (method != null)
+            {
+                foreach (var item in method.Children)
+                {
+                    if (item is Ellipse)
+                    {
+                        var dockPoint = item as Ellipse;
+
+                        if (dockPoint.Tag != null && ((DockTag)dockPoint.Tag).DockLine != null)
+                        {
+                            var dockHelper = (DockTag)dockPoint.Tag;
+                            var p = dockPoint.TranslatePoint(new Point(0, 0), canvas);
+
+                            if (dockHelper.IsEnd == true)
+                            {
+                                dockHelper.DockLine.X2 = p.X + radius;
+                                dockHelper.DockLine.Y2 = p.Y + radius;
+                            }
+                            else
+                            {
+                                dockHelper.DockLine.X1 = p.X + radius;
+                                dockHelper.DockLine.Y1 = p.Y + radius;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         private void canvas_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.RightButton == MouseButtonState.Pressed && e.LeftButton != MouseButtonState.Pressed)
@@ -485,7 +564,6 @@ namespace Editor
                     SelectedLine.Y2 = e.GetPosition(canvas).Y;
                 }
             }
-
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -526,7 +604,7 @@ namespace Editor
                 var serverComponentList = MyEditorClient.GetComponent();
                 serverComponents = serverComponentList.ComponentList;
                 Clients = serverComponentList.AvailableClients;
-   
+
             }
             catch (Exception ex)
             {
@@ -763,7 +841,7 @@ namespace Editor
             serverComponents = new List<Component>();
             componentView.Items.Clear();
             Clear_Click(null, null);
-            
+
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
