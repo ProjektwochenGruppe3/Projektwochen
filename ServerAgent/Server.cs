@@ -83,10 +83,19 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
                 foreach (var item in this.Clients)
                 {
-                    
+                    load += item.CpuLoad;
                 }
 
-                return load / this.Clients.Count();
+                try
+                {
+                    load /= this.Clients.Count();
+                }
+                catch
+                {
+                    return 100;
+                }
+
+                return load;
             }
         }
 
@@ -138,6 +147,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                         this.Clients.Add(client);
                         client.ClientThread.Start(client);
                         client.ClientDisconnected += this.OnClientDisconnected;
+                        this.ServerHandler.SendClientUpdateRequest(client, ClientState.Connected);
                     }
                 }
 
@@ -149,8 +159,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             Client client = (Client)args;
             NetworkStream netStream = client.ClientTcp.GetStream();
-
-            //this.JobHandler.DebugSendAtomicComponent(null, null);
 
             while (client.ClientAlive)
             {
@@ -269,6 +277,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             client.ClientAlive = false;
             this.Clients.Remove(client);
+            this.ServerHandler.SendClientUpdateRequest(client, ClientState.Disconnected);
             Console.WriteLine("Client {0} disconnected", client.FriendlyName);
         }
     }
