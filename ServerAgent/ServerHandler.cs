@@ -123,6 +123,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
         private void RequestWorker(object serverTcp)
         {
             TcpClient newServer = (TcpClient)serverTcp;
+            IPAddress serverIP = ((IPEndPoint)newServer.Client.RemoteEndPoint).Address;
 
             NetworkStream ns = newServer.GetStream();
 
@@ -133,7 +134,12 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     if (ns.DataAvailable)
                     {
                         ServerPackage pack = Networking.RecieveServerPackage(ns);
-                        this.HandlePackage(pack, newServer);
+
+                        ns.Close();
+                        ns.Dispose();
+                        newServer.Close();
+
+                        this.HandlePackage(pack, serverIP);
                     }
                 }
                 catch
@@ -144,39 +150,41 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
-        private void HandlePackage(ServerPackage pack, TcpClient serverTcpClient)
+        private void HandlePackage(ServerPackage pack, IPAddress serverIP)
         {
             switch (pack.MessageCode)
             {
                 case MessageCode.ClientUpdate:
-                    this.RecieveClientUpdateRequest(pack.Payload, serverTcpClient);
+                    this.RecieveClientUpdateRequest(pack.Payload, serverIP);
                     break;
                 case MessageCode.ComponentSubmit:
+                    this.RecieveComponentSubmit(pack.Payload, serverIP);
                     break;
                 case MessageCode.JobRequest:
+                    this.RecieveJobRequest(pack.Payload, serverIP);
                     break;
                 case MessageCode.JobResult:
+
                     break;
                 case MessageCode.KeepAlive:
-                    this.RecieveKeepAlive(pack.Payload, serverTcpClient);
+                    this.RecieveKeepAlive(pack.Payload, serverIP);
                     break;
                 case MessageCode.Logon:
-                    this.NewServerLogon(pack.Payload, serverTcpClient);
+                    this.NewServerLogon(pack.Payload, serverIP);
                     break;
                 case MessageCode.RequestAssembly:
+                    this.RecieveAssemblyRequest(pack.Payload, serverIP);
                     break;
                 default:
                     return;
             }
         }
 
-        private void NewServerLogon(string json, TcpClient serverTcpClient)
+        private void NewServerLogon(string json, IPAddress serverIP)
         {
-            NetworkStream ns = serverTcpClient.GetStream();
-            IPAddress ip = ((IPEndPoint)serverTcpClient.Client.RemoteEndPoint).Address;
             LogonRequest request = JsonConvert.DeserializeObject<LogonRequest>(json);
 
-            RemoteServer server = new RemoteServer(request.ServerGuid, request.FriendlyName, ip, request.AvailableComponents.ToList(), request.AvailableClients.ToList());
+            RemoteServer server = new RemoteServer(request.ServerGuid, request.FriendlyName, serverIP, request.AvailableComponents.ToList(), request.AvailableClients.ToList());
             this.RemoteServers.Add(server);
 
             LogonResponse response = new LogonResponse();
@@ -200,10 +208,26 @@ namespace ServerAgent_PW_Josef_Benda_V1
             response.AvailableClients = clientinfos;
             response.AvailableComponents = this.Server.LocalComponents.ToList();
 
-            string jsonResponse = JsonConvert.SerializeObject(response);
-            ServerPackage respPackage = new ServerPackage(MessageCode.Logon, jsonResponse);
+            // Send response
+            TcpClient client = new TcpClient();
 
-            Networking.SendServerPackage(respPackage, ns);
+            try
+            {
+                client.Connect(new IPEndPoint(serverIP, 10000));
+                NetworkStream ns = client.GetStream();
+
+                string jsonResponse = JsonConvert.SerializeObject(response);
+                ServerPackage respPackage = new ServerPackage(MessageCode.Logon, jsonResponse);
+
+                Networking.SendServerPackage(respPackage, ns);
+
+                ns.Close();
+                ns.Dispose();
+                client.Close();
+            }
+            catch
+            {
+            }
         }
 
         private void SendKeepAlive()
@@ -241,7 +265,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             //}
         }
 
-        private void RecieveKeepAlive(string json, TcpClient serverTcpClient)
+        private void RecieveKeepAlive(string json, IPAddress serverIP)
         {
             JsonSerializerSettings jss = new JsonSerializerSettings() { MissingMemberHandling = MissingMemberHandling.Error };
             KeepAliveRequest request = null;
@@ -255,7 +279,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 return;
             }
 
-            RemoteServer sender = this.RemoteServers.FirstOrDefault(x => x.IP == ((IPEndPoint)serverTcpClient.Client.RemoteEndPoint).Address);
+            RemoteServer sender = this.RemoteServers.FirstOrDefault(x => x.IP == serverIP);
 
             if (sender == null)
             {
@@ -273,13 +297,20 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             // Send response
             TcpClient client = new TcpClient();
-            
+
             try
             {
                 client.Connect(new IPEndPoint(sender.IP, 10000));
+                NetworkStream ns = client.GetStream();
 
                 string jsonresponse = JsonConvert.SerializeObject(new KeepAliveResponse() { KeepAliveRequestGuid = request.KeepAliveRequestGuid });
                 ServerPackage package = new ServerPackage(MessageCode.KeepAlive, jsonresponse);
+
+                Networking.SendServerPackage(package, ns);
+
+                ns.Dispose();
+                ns.Close();
+                client.Close();
             }
             catch
             {
@@ -301,7 +332,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.SendPackageToAllServers(package);
         }
 
-        private void RecieveClientUpdateRequest(string json, TcpClient serverTcpClient)
+        private void RecieveClientUpdateRequest(string json, IPAddress serverIP)
         {
             JsonSerializerSettings jss = new JsonSerializerSettings() { MissingMemberHandling = MissingMemberHandling.Error };
             ClientUpdateRequest request = null;
@@ -315,7 +346,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 return;
             }
 
-            RemoteServer sender = this.RemoteServers.FirstOrDefault(x => x.IP == ((IPEndPoint)serverTcpClient.Client.RemoteEndPoint).Address);
+            RemoteServer sender = this.RemoteServers.FirstOrDefault(x => x.IP == serverIP);
 
             if (sender == null)
             {
@@ -342,13 +373,267 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             // Send resonse
             TcpClient client = new TcpClient();
-            
+
             try
             {
                 client.Connect(new IPEndPoint(sender.IP, 10000));
+                NetworkStream ns = client.GetStream();
 
                 string jsonresponse = JsonConvert.SerializeObject(new ClientUpdateResponse() { ClientUpdateRequestGuid = request.ClientUpdateRequestGuid });
                 ServerPackage package = new ServerPackage(MessageCode.KeepAlive, jsonresponse);
+                Networking.SendServerPackage(package, ns);
+
+                ns.Close();
+                ns.Dispose();
+                client.Close();
+            }
+            catch
+            {
+            }
+        }
+
+        internal void SendComponentSubmitRequest(Component component)
+        {
+            ComponentSubmitRequest request = new ComponentSubmitRequest() { Component = component, ComponentSubmitRequestGuid = Guid.NewGuid() };
+
+            string json = JsonConvert.SerializeObject(request);
+            ServerPackage package = new ServerPackage(MessageCode.ComponentSubmit, json);
+            this.SendPackageToAllServers(package);
+        }
+
+        private void RecieveComponentSubmit(string json, IPAddress serverIP)
+        {
+            JsonSerializerSettings jss = new JsonSerializerSettings() { MissingMemberHandling = MissingMemberHandling.Error };
+            ComponentSubmitRequest request = null;
+
+            try
+            {
+                request = JsonConvert.DeserializeObject<ComponentSubmitRequest>(json, jss);
+            }
+            catch
+            {
+                return;
+            }
+
+            RemoteServer sender = this.RemoteServers.FirstOrDefault(x => x.IP == serverIP);
+
+            if (sender == null)
+            {
+                return;
+            }
+
+            if (request.Component != null)
+            {
+                sender.RemoteComponents.Add(request.Component);
+            }
+
+            // Send resonse
+            TcpClient client = new TcpClient();
+
+            try
+            {
+                client.Connect(new IPEndPoint(sender.IP, 10000));
+                NetworkStream ns = client.GetStream();
+
+                string jsonresponse = JsonConvert.SerializeObject(new ComponentSubmitResponse() { ComponentSubmitRequestGuid = request.ComponentSubmitRequestGuid, IsAccepted = true });
+                ServerPackage package = new ServerPackage(MessageCode.ComponentSubmit, jsonresponse);
+
+                Networking.SendServerPackage(package, ns);
+
+                ns.Close();
+                ns.Dispose();
+                client.Close();
+            }
+            catch
+            {
+            }
+        }
+
+        internal bool SendJobRequest(JobRequest request, Guid? targetClientGuid)
+        {
+            //JobRequest request = new JobRequest();
+            //request.FriendlyName = job.FriendlyName;
+            //request.HopCount = job.HopCount;
+            //request.InputData = job.InputData;
+            //request.JobComponent = job.JobComponent;
+            //request.JobGuid = job.JobGuid;
+            //request.JobRequestGuid = job.JobRequestGuid;
+            //request.JobSourceClientGuid = job.JobSourceClientGuid;
+            //request.TargetCalcClientGuid = job.TargetCalcClientGuid;
+            //request.TargetDisplayClient = job.TargetDisplayClient;
+
+            RemoteServer targetServer = null;
+
+            if (targetClientGuid == null)
+            {
+                targetServer = this.RemoteServers.FirstOrDefault(x => x.Load == this.RemoteServers.Min(y => y.Load));
+            }
+            else
+            {
+                targetServer = this.RemoteServers.FirstOrDefault(x => x.RemoteClients.Any(y => y.ClientGuid == targetClientGuid));
+            }
+
+            if (targetServer == null)
+            {
+                return false;
+            }
+
+            TcpClient client = new TcpClient();
+
+            try
+            {
+                client.Connect(new IPEndPoint(targetServer.IP, 10000));
+
+                string json = JsonConvert.SerializeObject(request);
+                ServerPackage package = new ServerPackage(MessageCode.JobRequest, json);
+                Networking.SendServerPackage(package, client.GetStream());
+            }
+            catch
+            {
+                return false;
+            }
+
+            // Wait for accept
+            int counter = 0;
+
+            try
+            {
+                while (counter < 30000)
+                {
+                    if (client.GetStream().DataAvailable)
+                    {
+                        ServerPackage response = Networking.RecieveServerPackage(client.GetStream());
+
+                        JobResponse jobResp = JsonConvert.DeserializeObject<JobResponse>(response.Payload);
+
+                        if (request.JobRequestGuid == jobResp.JobRequestGuid)
+                        {
+                            return jobResp.IsAccepted;
+                        }
+                    }
+
+                    counter += 500;
+                    Thread.Sleep(500);
+                }
+            }
+            catch
+            {
+            }
+
+            return false;
+        }
+
+        private void RecieveJobRequest(string json, IPAddress serverIP)
+        {
+            bool success = true;
+
+            EditorJob request = JsonConvert.DeserializeObject<EditorJob>(json);
+
+            if (request == null)
+            {
+                success = false;
+            }
+
+            request.JobAction = JobAction.Execute;
+
+            if (success)
+            {
+                try
+                {
+                    List<Component> components = new List<Component>();
+
+                    foreach (var item in this.Server.AvailableComponents)
+                    {
+                        components.Add(item);
+                    }
+                    List<Component> locals = this.Server.LocalComponents.ToList();
+                    List<Client> agents = this.Server.Clients.ToList();
+
+                    JobHandler handler = new JobHandler(this.Server, locals, components, agents);
+                    Thread t = new Thread(new ParameterizedThreadStart(handler.NewJob));
+                    t.IsBackground = true;
+                    t.Start(request);
+                }
+                catch
+                {
+                    success = false;
+                }
+            }
+
+            // Send resonse
+            TcpClient client = new TcpClient();
+
+            try
+            {
+                client.Connect(new IPEndPoint(serverIP, 10000));
+                NetworkStream ns = client.GetStream();
+
+                string jsonresponse = JsonConvert.SerializeObject(new JobResponse() { JobRequestGuid = request.JobRequestGuid, IsAccepted = success });
+                ServerPackage package = new ServerPackage(MessageCode.JobRequest, jsonresponse);
+
+                Networking.SendServerPackage(package, ns);
+
+                ns.Close();
+                ns.Dispose();
+                client.Close();
+            }
+            catch
+            {
+            }
+        }
+
+        internal bool SendAssemblyRequest(Guid componentID)
+        {
+            RemoteServer target = this.RemoteServers.FirstOrDefault(x => x.RemoteComponents.Any(y => y.ComponentGuid == componentID));
+
+            if (target == null)
+            {
+                return false;
+            }
+
+            AssemblyRequest request = new AssemblyRequest() { AssemblyRequestGuid = Guid.NewGuid(), ComponentGuid = componentID };
+
+            TcpClient client = new TcpClient();
+
+            try
+            {
+                client.Connect(target.IP, 10000);
+                NetworkStream ns = client.GetStream();
+                string json = JsonConvert.SerializeObject(request);
+                ServerPackage package = new ServerPackage(MessageCode.RequestAssembly, json);
+
+                Networking.SendServerPackage(package, ns);
+
+                ns.Close();
+                ns.Dispose();
+                client.Close();
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void RecieveAssemblyRequest(string json, IPAddress serverIP)
+        {
+            AssemblyRequest request = JsonConvert.DeserializeObject<AssemblyRequest>(json);
+
+            byte[] data = ServerOperations.GetComponentBytes(request.ComponentGuid);
+
+            TcpClient client = new TcpClient();
+
+            try
+            {
+                client.Connect(serverIP, 10000);
+                NetworkStream ns = client.GetStream();
+
+                Networking.SendRemoteAssembly(data, ns);
+
+                ns.Close();
+                ns.Dispose();
+                client.Close();
             }
             catch
             {
@@ -364,8 +649,13 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 try
                 {
                     client.Connect(new IPEndPoint(item.IP, 10000));
+                    NetworkStream ns = client.GetStream();
 
-                    Networking.SendServerPackage(package, client.GetStream());
+                    Networking.SendServerPackage(package, ns);
+
+                    ns.Close();
+                    ns.Dispose();
+                    client.Close();
                 }
                 catch
                 {

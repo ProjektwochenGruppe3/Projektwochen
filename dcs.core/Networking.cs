@@ -103,5 +103,55 @@ namespace dcs.core
             stream.Write(fullData, 0, fullData.Length);
             stream.Flush();
         }
+
+        public static byte[] RecieveRemoteAssembly(NetworkStream netstream)
+        {
+            byte[] length = new byte[sizeof(int)];
+
+            try
+            {
+                BinaryReader reader = new BinaryReader(netstream);
+
+                byte code = reader.ReadByte();
+
+                length = reader.ReadBytes(sizeof(int));
+                int streamlength = BitConverter.ToInt32(length, 0);
+                byte[] data = new byte[streamlength];
+
+                data = reader.ReadBytes(streamlength);
+
+                return data;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static void SendRemoteAssembly(byte[] data, NetworkStream stream)
+        {
+            int dataLength = data.Length;
+
+            if (data == null)
+            {
+                dataLength = 0;
+            }
+
+            byte[] length = BitConverter.GetBytes(dataLength);
+
+            byte[] fullData = new byte[sizeof(int) + dataLength + 1];
+
+            fullData[0] = (byte)MessageCode.RequestAssembly;
+
+            Array.Copy(length, 0, fullData, 1, length.Length);
+
+            if (data != null)
+            {
+                Array.Copy(data, 0, fullData, 1 + length.Length, data.Length);
+            }
+
+            stream.Write(fullData, 0, fullData.Length);
+            stream.Flush();
+        }
     }
 }

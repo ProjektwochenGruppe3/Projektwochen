@@ -107,9 +107,9 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
-        private EditorHandler EditorHander { get; set; }
+        internal ServerHandler ServerHandler { get; set; }
 
-        private ServerHandler ServerHandler { get; set; }
+        private EditorHandler EditorHander { get; set; }
 
         private TcpListener Listener { get; set; }  
 

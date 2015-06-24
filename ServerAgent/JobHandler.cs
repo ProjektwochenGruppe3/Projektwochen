@@ -46,6 +46,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             if (job.JobAction == JobAction.Save)
             {
                 ServerOperations.SaveComponent(job.JobComponent);
+                this.Server.ServerHandler.SendComponentSubmitRequest(job.JobComponent);
             }
             else
             {
@@ -56,6 +57,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             if (job.JobAction == JobAction.SaveAndExecute)
             {
                 ServerOperations.SaveComponent(job.JobComponent);
+                this.Server.ServerHandler.SendComponentSubmitRequest(job.JobComponent);
             }
         }
 
@@ -65,21 +67,36 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             if (this.LocalAgents.Count() == 0)
             {
-                //TODO REDIRECT to server
+                this.Server.ServerHandler.SendJobRequest(request, null);
                 return;
             }
 
             Tuple<ClientInfo, bool> calc = this.FindClient(request.TargetCalcClientGuid);
             Tuple<ClientInfo, bool> display = this.FindClient(request.TargetDisplayClient);
 
-            if (!calc.Item2)
+            if (!calc.Item2 && request.HopCount < this.Server.ServerHandler.RemoteServers.Count())
             {
-                // TODO redirect to server
+                if (!this.Server.ServerHandler.SendJobRequest(request, calc.Item1.ClientGuid))
+                {
+                    Console.WriteLine("The remote server denied the job request!");
+                }
+
+                return;
+            }
+            else if (!display.Item2 && request.HopCount < this.Server.ServerHandler.RemoteServers.Count())
+            {
+                if(!this.Server.ServerHandler.SendJobRequest(request, display.Item1.ClientGuid))
+                {
+                    Console.WriteLine("The remote server denied the job request!");
+                }
+
+                return;
             }
 
+            // Request all assemblies that are currently not available locally.
             foreach (var item in this.JobParts.Where(x => !this.LocalComponents.Contains(x.Component)))
             {
-                // REQUEST COMPONENT FROM OTHER SERVER
+                byte[] assembly = this.Server.ServerHandler.SendAssemblyRequest(item.Component.ComponentGuid);
             }            
 
             this.CreateClientWorkLoads();
@@ -173,30 +190,30 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
-        public void DebugSendAtomicComponent(JobRequest request, ClientInfo info)
-        {
-            //byte[] comp = ServerOperations.GetComponentBytes(request.JobComponent.ComponentGuid);
-            byte[] comp = System.IO.File.ReadAllBytes(System.IO.Path.Combine(Environment.CurrentDirectory, "Components", "ConsoleInput.dll"));
-            AgentExecutable package = new AgentExecutable(comp);
+        //public void DebugSendAtomicComponent(JobRequest request, ClientInfo info)
+        //{
+        //    //byte[] comp = ServerOperations.GetComponentBytes(request.JobComponent.ComponentGuid);
+        //    byte[] comp = System.IO.File.ReadAllBytes(System.IO.Path.Combine(Environment.CurrentDirectory, "Components", "ConsoleInput.dll"));
+        //    AgentExecutable package = new AgentExecutable(comp);
 
-            //DEBUG
-            TcpClient client = new TcpClient();
-            client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 47474));
-            NetworkStream ns = client.GetStream();
+        //    //DEBUG
+        //    TcpClient client = new TcpClient();
+        //    client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 47474));
+        //    NetworkStream ns = client.GetStream();
 
-            Networking.SendPackage(package, ns);
+        //    Networking.SendPackage(package, ns);
 
-            Networking.SendPackage(new AgentExecutableParameters(null), ns);
+        //    Networking.SendPackage(new AgentExecutableParameters(null), ns);
 
-            while (true)
-            {
-                if (ns.DataAvailable)
-                {
-                    Console.WriteLine(((AgentExecutableResult)Networking.RecievePackage(ns)).Results.ToList()[0].ToString());
-                    break;
-                }
-            }
-        }
+        //    while (true)
+        //    {
+        //        if (ns.DataAvailable)
+        //        {
+        //            Console.WriteLine(((AgentExecutableResult)Networking.RecievePackage(ns)).Results.ToList()[0].ToString());
+        //            break;
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// 
