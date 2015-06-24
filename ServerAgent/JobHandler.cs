@@ -125,7 +125,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     node.NodeInputGuids = new List<Guid>();
                     node.TargetGuids = new List<Guid>();
                     node.TargetPorts = new List<uint>();
-                    node.TargetPorts.Add(item.OutputValueID);
+                    node.TargetPorts.Add(item.InputValueID);
                     node.TargetGuids.Add(item.InternalInputComponentGuid);
                     node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.OutputComponentGuid);
                     node.InputParameters = new List<object>();
