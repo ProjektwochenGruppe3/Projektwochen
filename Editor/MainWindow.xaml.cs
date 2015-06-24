@@ -73,7 +73,7 @@ namespace Editor
             serverComponents = new List<Component>();
             usedComponents = new List<Canvas>();
 
-            FillWithTestComponents();
+            //FillWithTestComponents();
         }
 
 
