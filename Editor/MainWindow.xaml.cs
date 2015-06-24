@@ -70,43 +70,55 @@ namespace Editor
             serverComponents = new List<Component>();
             usedComponents = new List<Canvas>();
 
-            //var testComponent = new Component();
-            //testComponent.FriendlyName = "Start";
-            //testComponent.InputHints = new List<string>() { };
-            //testComponent.OutputHints = new List<string>() { "string" };
-            //testComponent.ComponentGuid = Guid.NewGuid();
-
-            //serverComponents.Add(testComponent);
-
-            //var ohneInput = new Component();
-            //ohneInput.FriendlyName = "End";
-            //ohneInput.InputHints = new List<string>() { "string" };
-            //ohneInput.OutputHints = new List<string>() { };
-            //ohneInput.ComponentGuid = Guid.NewGuid();
-            //serverComponents.Add(ohneInput);
-
-            //testComponent = new Component();
-            //testComponent.FriendlyName = "Simple String";
-            //testComponent.InputHints = new List<string>() { "string" };
-            //testComponent.OutputHints = new List<string>() { "string" };
-            //testComponent.ComponentGuid = Guid.NewGuid();
-            //serverComponents.Add(testComponent);
-
-            //testComponent = new Component();
-            //testComponent.FriendlyName = "Other";
-            //testComponent.InputHints = new List<string>() { "string", "string", "string" };
-            //testComponent.OutputHints = new List<string>() { "string" };
-            //testComponent.ComponentGuid = Guid.NewGuid();
-            //serverComponents.Add(testComponent);
-
-            //testComponent = new Component();
-            //testComponent.FriendlyName = "Test2";
-            //testComponent.InputHints = new List<string>() { "string" };
-            //testComponent.OutputHints = new List<string>() { "string" };
-            //testComponent.ComponentGuid = Guid.NewGuid();
-            //serverComponents.Add(testComponent);
+            FillWithTestComponents();
+        }
 
 
+        private void FillWithTestComponents()
+        {
+            var testComponent = new Component();
+            testComponent.FriendlyName = "Start";
+            testComponent.InputHints = new List<string>() { };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+
+            serverComponents.Add(testComponent);
+
+            var ohneInput = new Component();
+            ohneInput.FriendlyName = "End";
+            ohneInput.InputHints = new List<string>() { "string" };
+            ohneInput.OutputHints = new List<string>() { };
+            ohneInput.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(ohneInput);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Simple String";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Other";
+            testComponent.InputHints = new List<string>() { "string", "string", "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Test2";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            foreach (var item in serverComponents)
+            {
+                Label componentLabel = new Label();
+                componentLabel.Content = item.FriendlyName;
+                componentLabel.Tag = item;
+                componentView.Items.Add(componentLabel);
+            }
         }
 
         private void ListViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -334,16 +346,22 @@ namespace Editor
                     }
                     else
                     {
-                        (SelectedLine.Parent as Canvas).Children.Remove(SelectedLine);
-                        SelectedLine = null;
+                        if (SelectedLine.Parent != null)
+                        {
+                            (SelectedLine.Parent as Canvas).Children.Remove(SelectedLine);
+                            SelectedLine = null;
+                        }
                     }
                 }
                 else
                 {
                     if (dockHelper.IsInput || lineHelper.InputDock.Parent == dockPoint.Parent || dockHelper.DataType != ((DockTag)lineHelper.InputDock.Tag).DataType)
                     {
-                        (SelectedLine.Parent as Canvas).Children.Remove(SelectedLine);
-                        SelectedLine = null;
+                        if (SelectedLine.Parent != null)
+                        {
+                            (SelectedLine.Parent as Canvas).Children.Remove(SelectedLine);
+                            SelectedLine = null;
+                        }
                     }
                     else
                     {
@@ -700,7 +718,7 @@ namespace Editor
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Clear_Click(object sender, RoutedEventArgs e)
         {
             List<Object> elementsToDelete = new List<Object>();
 
@@ -741,6 +759,11 @@ namespace Editor
 
             lbl_name.IsEnabled = false;
             txt_name.IsEnabled = false;
+
+            serverComponents = new List<Component>();
+            componentView.Items.Clear();
+            Clear_Click(null, null);
+            
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -804,12 +827,12 @@ namespace Editor
                 }
                 catch
                 {
-                    MessageBox.Show("Der Job konnte nicht gespeichert werden");
+                    MessageBox.Show("Der Job konnte nicht übertragen werden");
                 }
             }
             else
             {
-                MessageBox.Show("Der Job konnte nicht gespeichert werden");
+                MessageBox.Show("Der Job konnte nicht übertragen werden");
             }
         }
 
@@ -937,13 +960,6 @@ namespace Editor
 
         private void Execute_Click(object sender, RoutedEventArgs e)
         {
-            if (txt_name.Text == string.Empty)
-            {
-                MessageBox.Show("Bitte geben Sie einen Namen für Ihre Komponente ein");
-                txt_name.Focus();
-                return;
-            }
-
             switch (GraphisValid())
             {
                 case validTypes.none:
