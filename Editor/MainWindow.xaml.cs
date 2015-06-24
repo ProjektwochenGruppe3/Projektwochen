@@ -700,7 +700,7 @@ namespace Editor
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Clear_Click(object sender, RoutedEventArgs e)
         {
             List<Object> elementsToDelete = new List<Object>();
 
@@ -741,6 +741,10 @@ namespace Editor
 
             lbl_name.IsEnabled = false;
             txt_name.IsEnabled = false;
+
+            serverComponents = new List<Component>();
+            Clear_Click(null, null);
+            
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -804,12 +808,12 @@ namespace Editor
                 }
                 catch
                 {
-                    MessageBox.Show("Der Job konnte nicht gespeichert werden");
+                    MessageBox.Show("Der Job konnte nicht übertragen werden");
                 }
             }
             else
             {
-                MessageBox.Show("Der Job konnte nicht gespeichert werden");
+                MessageBox.Show("Der Job konnte nicht übertragen werden");
             }
         }
 
@@ -937,13 +941,6 @@ namespace Editor
 
         private void Execute_Click(object sender, RoutedEventArgs e)
         {
-            if (txt_name.Text == string.Empty)
-            {
-                MessageBox.Show("Bitte geben Sie einen Namen für Ihre Komponente ein");
-                txt_name.Focus();
-                return;
-            }
-
             switch (GraphisValid())
             {
                 case validTypes.none:
