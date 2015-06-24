@@ -8,12 +8,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Core.Network;
 using dcs.core;
+using Newtonsoft.Json;
 
 namespace ServerAgent_PW_Josef_Benda_V1
 {
     public class ServerHandler
     {
-        public ServerHandler()
+        public ServerHandler(Server server)
         {
             this.RemoteServers = new List<RemoteServer>();
             this.MyGuid = Guid.NewGuid();
@@ -21,9 +22,16 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.ListenerThread = new Thread(new ThreadStart(this.ListenerWorker));
             //this.ListenerThread.Start();
             this.ListenerThread.IsBackground = true;
+            this.MyFriendlyName = "EG42";
+            this.Server = server;
+            this.Timer = new System.Timers.Timer(30000);
+            this.Timer.AutoReset = true;
+            this.Timer.Elapsed += this.OnTimerElapsed;
         }
 
         public Guid MyGuid { get; set; }
+
+        public string MyFriendlyName { get; set; }
 
         public List<RemoteServer> RemoteServers { get; set; }
 
@@ -64,6 +72,10 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         private Thread ListenerThread { get; set; }
 
+        private Server Server { get; set; }
+
+        private System.Timers.Timer Timer { get; set; }
+
         private void ListenerWorker()
         {
             this.Listener.Start();
@@ -98,13 +110,88 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 {
                     if (ns.DataAvailable)
                     {
-                        Networking.RecieveServerPackage(ns);
+                        ServerPackage pack = Networking.RecieveServerPackage(ns);
+                        this.HandlePackage(pack, ns);
                     }
                 }
                 catch
                 {
                 }
+
+                Thread.Sleep(42);
             }
+        }
+
+        private void HandlePackage(ServerPackage pack, NetworkStream ns)
+        {
+            switch (pack.MessageCode)
+            {
+                case MessageCode.ClientUpdate:
+                    break;
+                case MessageCode.ComponentSubmit:
+                    break;
+                case MessageCode.JobRequest:
+                    break;
+                case MessageCode.JobResult:
+                    break;
+                case MessageCode.KeepAlive:
+                    break;
+                case MessageCode.Logon:
+                    this.NewServerLogon(pack.Payload, ns);
+                    break;
+                case MessageCode.RequestAssembly:
+                    break;
+                default:
+                    return;
+            }
+        }
+
+        private void NewServerLogon(string json, NetworkStream ns)
+        {
+            LogonRequest request = JsonConvert.DeserializeObject<LogonRequest>(json);
+
+            RemoteServer server = new RemoteServer(request.ServerGuid, request.FriendlyName, request.AvailableComponents.ToList(), request.AvailableClients.ToList());
+            this.RemoteServers.Add(server);
+
+            LogonResponse response = new LogonResponse();
+            response.ServerGuid = this.MyGuid;
+            response.FriendlyName = this.MyFriendlyName;
+            response.LogonRequestGuid = request.LogonRequestGuid;
+
+            List<Client> clients = this.Server.Clients.ToList();
+            List<ClientInfo> clientinfos = new List<ClientInfo>();
+
+            foreach (var item in clients)
+            {
+                ClientInfo ci = new ClientInfo();
+                ci.ClientGuid = item.ClientGuid;
+                ci.FriendlyName = item.FriendlyName;
+                ci.IpAddress = ((IPEndPoint)item.ClientTcp.Client.RemoteEndPoint).Address;
+
+                clientinfos.Add(ci);
+            }
+
+            response.AvailableClients = clientinfos;
+            response.AvailableComponents = this.Server.LocalComponents.ToList();
+
+            string jsonResponse = JsonConvert.SerializeObject(response);
+            ServerPackage respPackage = new ServerPackage(MessageCode.Logon, jsonResponse);
+
+            Networking.SendServerPackage(respPackage, ns);
+        }
+
+        private void SendKeepAlive()
+        {
+            KeepAliveRequest request = new KeepAliveRequest();
+            request.KeepAliveRequestGuid = Guid.NewGuid();
+            request.NumberOfClients = this.Server.Clients.Count();
+            request.Terminate = false;
+            request.CpuLoad = this.Server.TotalCPULoad;
+        }
+
+        private void OnTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            this.SendKeepAlive();
         }
     }
 }

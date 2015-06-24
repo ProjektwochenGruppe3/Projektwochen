@@ -22,7 +22,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.ServerAlive = true;
             this.Listener = new TcpListener(IPAddress.Any, 13370);
             this.listenerThread = new Thread(new ThreadStart(ListenerWorker));
-            this.ServerHandler = new ServerHandler();
+            this.ServerHandler = new ServerHandler(this);
             this.EditorHander = new EditorHandler(this);
         }
 
@@ -67,6 +67,26 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 }
 
                 return clients;
+            }
+        }
+
+        public int TotalCPULoad
+        {
+            get
+            {
+                int load = 0;
+
+                if (this.Clients.Count() == 0)
+                {
+                    return 100;
+                }
+
+                foreach (var item in this.Clients)
+                {
+                    
+                }
+
+                return load / this.Clients.Count();
             }
         }
 
