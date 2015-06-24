@@ -19,18 +19,18 @@ namespace Editor
     /// </summary>
     public partial class SelectClients : Window
     {
-        public MainWindow myMainWindow { get; set; }
+        public MainWindow MyMainWindow { get; set; }
 
         public SelectClients(MainWindow mainWindow)
         {
-            this.myMainWindow = mainWindow;
+            this.MyMainWindow = mainWindow;
 
             InitializeComponent();
 
             cb_selectCalcClient.Items.Add("Dem Server überlassen (Standard)");
             cb_selectDisplayClient.Items.Add("Dem Server überlassen (Standard)");
 
-            foreach (var item in myMainWindow.Clients)
+            foreach (var item in MyMainWindow.Clients)
             {
                 cb_selectCalcClient.Items.Add(item.Item1 + " " + item.Item2);
                 cb_selectDisplayClient.Items.Add(item.Item1 + " " + item.Item2);
@@ -41,6 +41,38 @@ namespace Editor
 
             cb_selectDisplayClient.FontFamily = new FontFamily("Consolas");
             cb_selectDisplayClient.SelectedIndex = 0;
+        }
+
+        private void Confirm_Click(object sender, RoutedEventArgs e)
+        {
+            int indexCalc = cb_selectCalcClient.SelectedIndex;
+            int indexDisp = cb_selectDisplayClient.SelectedIndex;
+
+            Guid displayGuid;
+            Guid calcGuid;
+
+            if (indexCalc == 0)
+            {
+                calcGuid = Guid.Empty;
+            }
+            else
+            {
+                calcGuid = MyMainWindow.Clients[indexCalc - 1].Item1;
+            }
+
+            if (indexDisp == 0)
+            {
+                displayGuid = Guid.Empty;
+            }
+            else
+            {
+                displayGuid = MyMainWindow.Clients[indexDisp - 1].Item1;
+
+            }
+
+            MyMainWindow.AfterDialogClosed(displayGuid, calcGuid);
+            this.Hide();
+            
         }
     }
 }

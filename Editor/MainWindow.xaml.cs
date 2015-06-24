@@ -41,29 +41,15 @@ namespace Editor
 
         private List<Canvas> usedComponents;
 
-        public object Locker;
+        public SelectClients ClientsWindow;
+
+        private EditorJob CurrentJob;
 
         private int radius = 10;
 
         public MainWindow()
         {
             InitializeComponent();
-
-            Locker = new object();
-            Clients = new List<Tuple<Guid, string>>();
-
-            var tupel0 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 1");
-            var tupel1 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 2");
-            var tupel2 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 3");
-            var tupel3 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 4");
-
-            Clients.Add(tupel0);
-            Clients.Add(tupel1);
-            Clients.Add(tupel2);
-            Clients.Add(tupel3);
-
-            SelectClients window = new SelectClients(this);
-            window.Show();
 
             EditorGuid = Guid.NewGuid();
 
@@ -74,6 +60,7 @@ namespace Editor
             usedComponents = new List<Canvas>();
 
             //FillWithTestComponents();
+            //FillWithTestClients();
         }
 
 
@@ -123,6 +110,19 @@ namespace Editor
                 componentLabel.Tag = item;
                 componentView.Items.Add(componentLabel);
             }
+        }
+
+        private void FillWithTestClients()
+        {
+            Clients = new List<Tuple<Guid, string>>();
+            var tupel0 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 1");
+            var tupel1 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 2");
+            var tupel2 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 3");
+            var tupel3 = new Tuple<Guid, string>(Guid.NewGuid(), "Client 4");
+            Clients.Add(tupel0);
+            Clients.Add(tupel1);
+            Clients.Add(tupel2);
+            Clients.Add(tupel3);
         }
 
         private void ListViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -255,6 +255,8 @@ namespace Editor
             Canvas.SetLeft(methodBox, boxLeftPosition);
             Canvas.SetTop(methodBox, boxTopPosition);
 
+            Guid internalGuid = Guid.NewGuid();
+
             int k = boxTopPosition + outputHeight;
 
             for (int i = 0; i < toAdd.OutputHints.Count(); i++)
@@ -301,7 +303,7 @@ namespace Editor
                 dockHelper.DockLine = null;
                 dockHelper.IsInput = false;
                 dockHelper.OtherDockPoint = null;
-                dockHelper.Guid = Guid.NewGuid();
+                dockHelper.Guid = internalGuid;
                 dockHelper.ParamPosition = (uint)i + 1;
                 dockHelper.DataType = toAdd.OutputHints.ToList()[i].ToString();
                 dockPointOutput.Tag = dockHelper;
@@ -346,7 +348,7 @@ namespace Editor
                 dockHelper.DockLine = null;
                 dockHelper.IsInput = true;
                 dockHelper.OtherDockPoint = null;
-                dockHelper.Guid = Guid.NewGuid();
+                dockHelper.Guid = internalGuid;
                 dockHelper.ParamPosition = (uint)i + 1;
                 dockHelper.DataType = toAdd.InputHints.ToList()[i].ToString();
                 dockPointInput.Tag = dockHelper;
@@ -889,6 +891,7 @@ namespace Editor
             job.InputData = new List<object>();
 
             job.JobSourceClientGuid = EditorGuid;
+            job.JobGuid = Guid.NewGuid();
             job.TargetCalcClientGuid = null;
             job.TargetDisplayClient = null;
 
@@ -1032,8 +1035,25 @@ namespace Editor
             else
             {
                 job.JobAction = JobAction.SaveAndExecute;
+                CurrentJob = job;
+
                 Send_Job(job);
             }
+        }
+
+        public void AfterDialogClosed(Guid displayGuid, Guid calcGuid)
+        {
+            CurrentJob.TargetDisplayClient = displayGuid;
+            CurrentJob.TargetCalcClientGuid = calcGuid;
+            try
+            {
+                Send_Job(CurrentJob);
+            }
+            catch
+            {
+                MessageBox.Show("Konnte nicht zum Server gesendet werden.");
+            }
+            CurrentJob = null;
         }
 
         private void Execute_Click(object sender, RoutedEventArgs e)
@@ -1059,7 +1079,10 @@ namespace Editor
             else
             {
                 job.JobAction = JobAction.Execute;
-                Send_Job(job);
+                CurrentJob = job;
+
+                SelectClients window = new SelectClients(this);
+                window.Show();
             }
         }
     }
