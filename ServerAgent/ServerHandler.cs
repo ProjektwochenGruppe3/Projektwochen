@@ -180,9 +180,18 @@ namespace ServerAgent_PW_Josef_Benda_V1
             Networking.SendServerPackage(respPackage, ns);
         }
 
+        private void SendKeepAlive()
+        {
+            KeepAliveRequest request = new KeepAliveRequest();
+            request.KeepAliveRequestGuid = Guid.NewGuid();
+            request.NumberOfClients = this.Server.Clients.Count();
+            request.Terminate = false;
+            request.CpuLoad = this.Server.TotalCPULoad;
+        }
+
         private void OnTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            throw new NotImplementedException();
+            this.SendKeepAlive();
         }
     }
 }

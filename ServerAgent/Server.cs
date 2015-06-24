@@ -70,6 +70,26 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
+        public int TotalCPULoad
+        {
+            get
+            {
+                int load = 0;
+
+                if (this.Clients.Count() == 0)
+                {
+                    return 100;
+                }
+
+                foreach (var item in this.Clients)
+                {
+                    
+                }
+
+                return load / this.Clients.Count();
+            }
+        }
+
         internal List<Component> LocalComponents
         {
             get
