@@ -122,12 +122,12 @@ namespace ClientAgent
 
         public void ListenerWorker()
         {
+            Thread executionThread = new Thread(new ThreadStart(ExecutionWorker));
+            executionThread.Start();
             while (this.ListenerActive)
             {
                 if (this.Listener.Pending())
                 {
-                    Thread executionThread = new Thread(new ThreadStart(ExecutionWorker));
-                    executionThread.Start();
                     Thread DLL_Loading_Thread = new Thread(new ParameterizedThreadStart(DLL_Worker));
                     AtomicJob atjob = new AtomicJob(DLL_Loading_Thread, this.Listener.AcceptTcpClient());
                     this.TaskList.Add(atjob);
@@ -172,6 +172,7 @@ namespace ClientAgent
                         {
                             job.Params = para.Parameters;
                             this.ExecutableJobs.Add(job);
+                            inExecutableList = true;
                         }
                     }
                 }
