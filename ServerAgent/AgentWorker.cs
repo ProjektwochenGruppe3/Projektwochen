@@ -49,9 +49,9 @@ namespace ServerAgent_PW_Josef_Benda_V1
             {
                 while (true)
                 {
-                    int missingArgsCount = this.Action.InputParameters.Where(x => x == null).Count();
+                    bool argsMissing = this.Action.InputParameters.Any(x => x == null);
 
-                    if (missingArgsCount == 0)
+                    if (!argsMissing)
                     {
                         AgentExecutableParameters paramameters = new AgentExecutableParameters(this.Action.InputParameters);
 
