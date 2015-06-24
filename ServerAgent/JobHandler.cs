@@ -82,7 +82,25 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 // REQUEST COMPONENT FROM OTHER SERVER
             }
 
+            
+
             this.CreateClientWorkLoads();
+
+            if (calc.Item2 && calc.Item1 != null)
+            {
+                foreach (var item in this.AgentWorkers.Where(x => x.Action.NodeInputGuids.Count() == 0))
+                {
+                    item.AgentAddress = calc.Item1.IpAddress;
+                }
+            }
+
+            if (display.Item2 && display.Item1 != null)
+            {
+                foreach (var item in this.AgentWorkers.Where(x => x.Action.TargetGuids.Count() == 0))
+                {
+                    item.AgentAddress = display.Item1.IpAddress;
+                }
+            }
 
             foreach (var item in this.AgentWorkers)
             {

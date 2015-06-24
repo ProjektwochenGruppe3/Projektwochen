@@ -97,7 +97,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     break;
                 }
 
-                Thread.Sleep(10);
+                Thread.Sleep(42);
             }
         }
 
