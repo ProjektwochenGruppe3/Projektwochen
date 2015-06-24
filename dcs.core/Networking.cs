@@ -56,5 +56,31 @@ namespace dcs.core
                 return null;
             }
         }
+
+        public static object RecieveServerPackage(NetworkStream netstream)
+        {
+            byte[] length = new byte[sizeof(int)];
+
+            try
+            {
+                BinaryReader reader = new BinaryReader(netstream);
+                
+                byte code = reader.ReadByte();
+
+                length = reader.ReadBytes(sizeof(int));
+                int streamlength = BitConverter.ToInt32(length, 0);
+                byte[] data = new byte[streamlength];
+
+                data = reader.ReadBytes(streamlength);
+
+                MemoryStream memstream = new MemoryStream(data);
+
+                return formatter.Deserialize(memstream);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }
