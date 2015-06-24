@@ -63,7 +63,6 @@ namespace Editor
             //FillWithTestClients();
         }
 
-
         private void FillWithTestComponents()
         {
             var testComponent = new Component();
