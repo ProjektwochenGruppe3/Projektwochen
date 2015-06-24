@@ -80,9 +80,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             foreach (var item in this.JobParts.Where(x => !this.LocalComponents.Contains(x.Component)))
             {
                 // REQUEST COMPONENT FROM OTHER SERVER
-            }
-
-            
+            }            
 
             this.CreateClientWorkLoads();
 
