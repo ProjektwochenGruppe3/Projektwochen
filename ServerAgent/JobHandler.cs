@@ -125,31 +125,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     node.NodeInputGuids = new List<Guid>();
                     node.TargetGuids = new List<Guid>();
                     node.TargetPorts = new List<uint>();
-                    node.TargetPorts.Add(item.InputValueID);
-                    node.TargetGuids.Add(item.InternalInputComponentGuid);
-                    node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.OutputComponentGuid);
-                    node.InputParameters = new List<object>();
-
-                    this.JobParts.Add(node);
-                }
-                else
-                {
-                    node.TargetGuids.Add(item.InternalInputComponentGuid);
-                    node.TargetPorts.Add(item.OutputValueID);
-                }
-            }
-
-            foreach (var item in component.Edges)
-            {
-                InternalNode node = null;
-                node = this.JobParts.FirstOrDefault(x => x.NodeInputGuids.Contains(item.InternalInputComponentGuid) && item.InternalInputComponentGuid != Guid.Empty);
-
-                if (node == null)
-                {
-                    node = new InternalNode();
-                    node.NodeInputGuids = new List<Guid>();
-                    node.TargetGuids = new List<Guid>();
-                    node.TargetPorts = new List<uint>();
                     node.NodeInputGuids.Add(item.InternalInputComponentGuid);
                     node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.InputComponentGuid);
                     node.InputParameters = new List<object>();
@@ -161,6 +136,31 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 {
                     node.NodeInputGuids.Add(item.InternalInputComponentGuid);
                     node.InputParameters.Add(null);
+                }
+            }
+
+            foreach (var item in component.Edges)
+            {
+                InternalNode node = null;
+                node = this.JobParts.FirstOrDefault(x => x.NodeInputGuids.Contains(item.InternalOutputComponentGuid) && item.InternalOutputComponentGuid != Guid.Empty);
+
+                if (node == null)
+                {
+                    node = new InternalNode();
+                    node.NodeInputGuids = new List<Guid>();
+                    node.TargetGuids = new List<Guid>();
+                    node.TargetPorts = new List<uint>();
+                    node.TargetPorts.Add(item.InputValueID);
+                    node.TargetGuids.Add(item.InternalInputComponentGuid);
+                    node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.OutputComponentGuid);
+                    node.InputParameters = new List<object>();
+
+                    this.JobParts.Add(node);
+                }
+                else
+                {
+                    node.TargetGuids.Add(item.InternalInputComponentGuid);
+                    node.TargetPorts.Add(item.OutputValueID);
                 }
             }
 
