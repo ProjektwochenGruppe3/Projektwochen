@@ -133,6 +133,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
                 try
                 {
+                    Networking.SendPackage(true, netStream);
+
                     if (netStream.DataAvailable)
                     {
                         recieved = Networking.RecievePackage(netStream) as AgentStatus;
@@ -149,7 +151,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     Console.WriteLine("CPU-Load of client {0} is {1}", client.FriendlyName, client.CpuLoad);
                 }
 
-                Thread.Sleep(50);
+                Thread.Sleep(500);
             }
 
             netStream.Close();
@@ -240,7 +242,9 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 return;
             }
 
+            client.ClientAlive = false;
             this.Clients.Remove(client);
+            Console.WriteLine("Client {0} disconnected", client.FriendlyName);
         }
     }
 }

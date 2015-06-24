@@ -24,6 +24,7 @@ namespace ClientAgent
             this.timer = new System.Timers.Timer();
             this.timer.AutoReset = true;
             this.TaskList = new List<AtomicJob>();
+            this.ExecutableJobs = new List<AtomicJob>();
             CPU_Diagnostic.InitialisierePerformanceCounter();
             this.Connect();
         }
@@ -62,13 +63,17 @@ namespace ClientAgent
 
         public bool Waiting { get; private set; }
 
+        public List<AtomicJob> ExecutableJobs { get; set; }
+
         public void SendKeepAliveResponse()
         {
             try
             {
+                byte[] buffer = new byte[100];
                 NetworkStream netStream = this.ClientTCP.GetStream();
                 while (this.Alive)
                 {
+                    Networking.RecievePackage(netStream);
                     AgentStatus response = new AgentStatus(this.firstKeepAliveGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
                     Networking.SendPackage(response, netStream);
                     Thread.Sleep(5000);
@@ -77,6 +82,7 @@ namespace ClientAgent
             catch
             {
                 Console.WriteLine("Server has disconnected!");
+                this.State = ClientState.connecting;
                 this.Connect();
             }
         }
@@ -120,11 +126,13 @@ namespace ClientAgent
             {
                 if (this.Listener.Pending())
                 {
+                    Thread executionThread = new Thread(new ThreadStart(ExecutionWorker));
                     Thread DLL_Loading_Thread = new Thread(new ParameterizedThreadStart(DLL_Worker));
                     AtomicJob atjob = new AtomicJob(DLL_Loading_Thread, this.Listener.AcceptTcpClient());
                     this.TaskList.Add(atjob);
                     atjob.ExecutableThread.Start(atjob);
                 }
+                Thread.Sleep(70);
             }
         }
 
@@ -135,6 +143,7 @@ namespace ClientAgent
             NetworkStream dllStream = job.Server.GetStream();
             string jobDllPath = Path.Combine(Environment.CurrentDirectory, job.AtJobGuid.ToString() + ".dll");
             job.OnExecutableResultsReady += handler.WriteResultToStream;
+            bool inExecutableList = false;
             while (job.InProgress)
             {
                 try
@@ -158,20 +167,11 @@ namespace ClientAgent
                                 job.FireOnExecutableResultsReady(dllStream);
                             }
                         }
-                        else if (para != null)
+                        else if (para != null || !inExecutableList)
                         {
-                            try
-                            {
-                                job.Params = para.Parameters;
-                                job.Result = ComponentExecuter.InvokeMethod(job);
-                                job.FireOnExecutableResultsReady(dllStream);
-                            }
-                            catch (Exception e)
-                            {
-                                job.State = Core.Network.JobState.Exception;
-                                job.Result = new List<string>() { e.Message };
-                                job.FireOnExecutableResultsReady(dllStream);
-                            }
+                            this.ExecutableJobs.Add(job);
+                            int jobIndex = this.ExecutableJobs.IndexOf(job);
+                            job.Params = para.Parameters;
                         }
                     }
                 }
@@ -181,6 +181,28 @@ namespace ClientAgent
                     handler.DeleteFile(jobDllPath);
                 }
                 Thread.Sleep(50);
+            }
+        }
+
+        public void ExecutionWorker()
+        {
+            while (true)
+            {
+                if (this.ExecutableJobs.Count != 0)
+                {
+                    try
+                    {
+                        this.ExecutableJobs[0].Result = ComponentExecuter.InvokeMethod(this.ExecutableJobs[0]);
+                        this.ExecutableJobs[0].State = Core.Network.JobState.Ok;
+                        this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
+                    }
+                    catch (Exception e)
+                    {
+                        this.ExecutableJobs[0].State = Core.Network.JobState.Exception;
+                        this.ExecutableJobs[0].Result = new List<string>() { e.Message };
+                        this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
+                    }
+                }
             }
         }
 
@@ -208,6 +230,9 @@ namespace ClientAgent
             }
             else
             {
+                this.ListenerActive = false;
+                this.ListenerThread.Join();
+                Environment.Exit(0);
             }
         }
 
@@ -218,5 +243,6 @@ namespace ClientAgent
                 this.Waiting = false;
             }
         }
+
     }
 }
