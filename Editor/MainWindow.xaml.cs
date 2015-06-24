@@ -53,14 +53,14 @@ namespace Editor
 
             EditorGuid = Guid.NewGuid();
 
-            txt_ip.Text = "10.13.52.57";
+            txt_ip.Text = "10.13.51.58";
             txt_port.Text = "30000";
 
             serverComponents = new List<Component>();
             usedComponents = new List<Canvas>();
 
             FillWithTestComponents();
-            FillWithTestClients();
+            //FillWithTestClients();
         }
 
         private void FillWithTestComponents()
@@ -75,6 +75,146 @@ namespace Editor
             serverComponents.Add(testComponent);
 
             var ohneInput = new Component();
+            ohneInput.FriendlyName = "End";
+            ohneInput.InputHints = new List<string>() { "string" };
+            ohneInput.OutputHints = new List<string>() { };
+            ohneInput.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(ohneInput);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Simple String";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Other";
+            testComponent.InputHints = new List<string>() { "string", "string", "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Test2";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            ohneInput = new Component();
+            ohneInput.FriendlyName = "End";
+            ohneInput.InputHints = new List<string>() { "string" };
+            ohneInput.OutputHints = new List<string>() { };
+            ohneInput.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(ohneInput);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Simple String";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Other";
+            testComponent.InputHints = new List<string>() { "string", "string", "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Test2";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            ohneInput = new Component();
+            ohneInput.FriendlyName = "End";
+            ohneInput.InputHints = new List<string>() { "string" };
+            ohneInput.OutputHints = new List<string>() { };
+            ohneInput.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(ohneInput);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Simple String";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Other";
+            testComponent.InputHints = new List<string>() { "string", "string", "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Test2";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            ohneInput = new Component();
+            ohneInput.FriendlyName = "End";
+            ohneInput.InputHints = new List<string>() { "string" };
+            ohneInput.OutputHints = new List<string>() { };
+            ohneInput.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(ohneInput);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Simple String";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Other";
+            testComponent.InputHints = new List<string>() { "string", "string", "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Test2";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            ohneInput = new Component();
+            ohneInput.FriendlyName = "End";
+            ohneInput.InputHints = new List<string>() { "string" };
+            ohneInput.OutputHints = new List<string>() { };
+            ohneInput.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(ohneInput);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Simple String";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Other";
+            testComponent.InputHints = new List<string>() { "string", "string", "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            testComponent = new Component();
+            testComponent.FriendlyName = "Test2";
+            testComponent.InputHints = new List<string>() { "string" };
+            testComponent.OutputHints = new List<string>() { "string" };
+            testComponent.ComponentGuid = Guid.NewGuid();
+            serverComponents.Add(testComponent);
+
+            ohneInput = new Component();
             ohneInput.FriendlyName = "End";
             ohneInput.InputHints = new List<string>() { "string" };
             ohneInput.OutputHints = new List<string>() { };
