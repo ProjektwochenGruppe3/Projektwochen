@@ -64,7 +64,7 @@ namespace dcs.core
             try
             {
                 BinaryReader reader = new BinaryReader(netstream);
-
+                
                 byte code = reader.ReadByte();
 
                 length = reader.ReadBytes(sizeof(int));

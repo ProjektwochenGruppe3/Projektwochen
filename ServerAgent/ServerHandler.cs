@@ -18,7 +18,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.MyGuid = Guid.NewGuid();
             this.Listener = new TcpListener(IPAddress.Any, 10001);
             this.ListenerThread = new Thread(new ThreadStart(this.ListenerWorker));
-            this.ListenerThread.Start();
+            //this.ListenerThread.Start();
             this.ListenerThread.IsBackground = true;
         }
 
