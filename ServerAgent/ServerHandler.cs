@@ -16,7 +16,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             this.RemoteServers = new List<RemoteServer>();
             this.MyGuid = Guid.NewGuid();
-            this.Listener = new TcpListener(IPAddress.Any, 10001);
+            this.Listener = new TcpListener(IPAddress.Any, 10000);
             this.ListenerThread = new Thread(new ThreadStart(this.ListenerWorker));
             //this.ListenerThread.Start();
             this.ListenerThread.IsBackground = true;
@@ -82,7 +82,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         private void Broadcast()
         {
-            throw new NotImplementedException();
+            // 10001 UDP
         }
 
         private void RequestWorker(TcpClient newServer)

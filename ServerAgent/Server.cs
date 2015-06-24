@@ -22,7 +22,6 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.ServerAlive = true;
             this.Listener = new TcpListener(IPAddress.Any, 13370);
             this.listenerThread = new Thread(new ThreadStart(ListenerWorker));
-            this.LocalComponents = ServerOperations.GetLocalComponents();
             this.ServerHandler = new ServerHandler();
             this.EditorHander = new EditorHandler(this);
         }
@@ -71,7 +70,13 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
-        internal List<Component> LocalComponents { get; set; }
+        internal List<Component> LocalComponents
+        {
+            get
+            {
+                return ServerOperations.GetLocalComponents();
+            }
+        }
 
         private EditorHandler EditorHander { get; set; }
 
