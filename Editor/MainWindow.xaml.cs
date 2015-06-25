@@ -1205,8 +1205,8 @@ namespace Editor
                             }
                         }
 
-                        if (!edges.Any(e => e.InternalInputComponentGuid == myEdge.InternalInputComponentGuid && e.InternalOutputComponentGuid == myEdge.InternalOutputComponentGuid && e.InputValueID == myEdge.InputValueID && e.OutputValueID == myEdge.OutputValueID))
-                        {
+                        //if (!edges.Any(e => e.InternalInputComponentGuid == myEdge.InternalInputComponentGuid && e.InternalOutputComponentGuid == myEdge.InternalOutputComponentGuid && e.InputValueID == myEdge.InputValueID && e.OutputValueID == myEdge.OutputValueID))
+                        //{
                         //    //if (myEdge.InternalOutputComponentGuid == Guid.Empty)
                             //{
                             var toReplace = edges.FirstOrDefault(l => l.InternalInputComponentGuid == myEdge.InternalInputComponentGuid && l.InputValueID == myEdge.InputValueID || l.InternalOutputComponentGuid == myEdge.InternalOutputComponentGuid && l.OutputValueID == myEdge.OutputValueID);
@@ -1234,7 +1234,7 @@ namespace Editor
                             //    edges.Remove(toReplace);
                             //    edges.Add(myEdge);
                             //}
-                        }
+                        //}
                         //else
                         //{
                         //    edges.Add(myEdge);

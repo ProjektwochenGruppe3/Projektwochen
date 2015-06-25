@@ -10,7 +10,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Margin="5 5 5 0">Auf welchem Rechner soll die Berechnung durchgeführt werden?</Label>
+        <Label Grid.Row="0" Margin="5 5 5 0">Auf welchem Rechner soll die Eingabe erfolgen?</Label>
         <ComboBox Height="20" Grid.Row="1" Name="cb_selectCalcClient" Margin="5 0 5 5"/>
         <Label Grid.Row="2" Margin="5 5 5 0">Auf welchem Rechner soll die Ausgabe erfolgen?</Label>
         <ComboBox Height="20" Grid.Row="3" Name="cb_selectDisplayClient" Margin="5 0 5 5"/>
