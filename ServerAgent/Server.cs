@@ -147,7 +147,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                         this.Clients.Add(client);
                         client.ClientThread.Start(client);
                         client.ClientDisconnected += this.OnClientDisconnected;
-                        this.ServerHandler.SendClientUpdateRequest(client, ClientState.Connected);
+                        //this.ServerHandler.SendClientUpdateRequest(client, ClientState.Connected);
                     }
                 }
 
@@ -277,7 +277,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             client.ClientAlive = false;
             this.Clients.Remove(client);
-            this.ServerHandler.SendClientUpdateRequest(client, ClientState.Disconnected);
+            //this.ServerHandler.SendClientUpdateRequest(client, ClientState.Disconnected);
             Console.WriteLine("Client {0} disconnected", client.FriendlyName);
         }
     }
