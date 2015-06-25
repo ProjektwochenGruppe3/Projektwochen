@@ -102,7 +102,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             this.Listener.Start();
 
-            this.Broadcast();
+            this.SendBroadcast();
 
             while (true)
             {
@@ -115,9 +115,14 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
-        private void Broadcast()
+        private void SendBroadcast()
         {
-            // 10001 UDP
+            IPEndPoint broadcastAddress = new IPEndPoint(IPAddress.Broadcast, 10001);
+            UdpClient client = new UdpClient(broadcastAddress);
+            client.EnableBroadcast = true;
+
+            byte[] pack = Encoding.UTF8.GetBytes("PWSP");
+            client.Send(pack, pack.Length);
         }
 
         private void RequestWorker(object serverTcp)
