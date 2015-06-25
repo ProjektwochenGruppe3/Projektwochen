@@ -450,7 +450,7 @@ namespace Editor
                 }
                 else
                 {
-                    var getGuid = toAdd.Edges.FirstOrDefault(w => w.InputComponentGuid == Guid.Empty && w.InputValueID == i + 1).OutputComponentGuid;
+                    var getGuid = toAdd.Edges.FirstOrDefault(w => w.InternalInputComponentGuid == Guid.Empty && w.InputValueID == i + 1);
 
                     if (getGuid == null)
                     {
@@ -458,12 +458,20 @@ namespace Editor
                     }
                     else
                     {
-                        internalGuid = getGuid;
+                        internalGuid = getGuid.InternalOutputComponentGuid;
                         dockHelper.Guid = internalGuid;
                     }
                 }
 
-                dockHelper.ParamPosition = (uint)i + 1;
+                if (toAdd.IsAtomic)
+                {
+                    dockHelper.ParamPosition = (uint)(i + 1);
+                }
+                else
+                {
+                    dockHelper.ParamPosition = toAdd.Edges.First(w => w.InternalInputComponentGuid == Guid.Empty && w.InputValueID == i + 1).OutputValueID;
+                }
+
                 dockHelper.DataType = toAdd.OutputHints.ToList()[i].ToString();
                 dockPointOutput.Tag = dockHelper;
 
@@ -514,7 +522,7 @@ namespace Editor
                 }
                 else
                 {
-                    var getGuid = toAdd.Edges.FirstOrDefault(w => w.OutputComponentGuid == Guid.Empty && w.OutputValueID == i + 1).InputComponentGuid;
+                    var getGuid = toAdd.Edges.FirstOrDefault(w => w.InternalOutputComponentGuid == Guid.Empty && w.OutputValueID == i + 1);
 
                     if (getGuid == null)
                     {
@@ -522,12 +530,20 @@ namespace Editor
                     }
                     else
                     {
-                        internalGuid = getGuid;
+                        internalGuid = getGuid.InternalInputComponentGuid;
                         dockHelper.Guid = internalGuid;
                     }
                 }
 
-                dockHelper.ParamPosition = (uint)i + 1;
+                if (toAdd.IsAtomic)
+                {
+                    dockHelper.ParamPosition = (uint)(i + 1);
+                }
+                else
+                {
+                    dockHelper.ParamPosition = toAdd.Edges.First(w => w.InternalOutputComponentGuid == Guid.Empty && w.OutputValueID == i + 1).InputValueID;
+                }
+
                 dockHelper.DataType = toAdd.InputHints.ToList()[i].ToString();
                 dockPointInput.Tag = dockHelper;
 
@@ -1123,77 +1139,108 @@ namespace Editor
 
             foreach (var method in usedComponents)
             {
-                    var component = method.Tag as Component;
-                    
-                    if (component.IsAtomic == false)
+                var component = method.Tag as Component;
+
+                if (component.IsAtomic == false)
+                {
+                    foreach (var item3 in component.Edges)
                     {
-                        foreach (var item3 in component.Edges)
+                        if (!edges.Contains(item3))
                         {
-                            if (!edges.Contains(item3))
-                            {
-                                edges.Add(item3);
-                            }
+                            edges.Add(item3);
                         }
                     }
+                }
 
-                    foreach (var item2 in method.Children)
+                foreach (var item2 in method.Children)
+                {
+                    if (item2 is Ellipse)
                     {
-                        if (item2 is Ellipse)
-                        {
-                            var dockPoint = item2 as Ellipse;
-                            var myDockTag = (DockTag)dockPoint.Tag;
-                            ComponentEdge myEdge = new ComponentEdge();
+                        var dockPoint = item2 as Ellipse;
+                        var myDockTag = (DockTag)dockPoint.Tag;
+                        ComponentEdge myEdge = new ComponentEdge();
 
-                            if (myDockTag.IsInput)
+                        if (myDockTag.IsInput)
+                        {
+                            if (myDockTag.OtherDockPoint == null)
                             {
-                                if (myDockTag.OtherDockPoint == null)
-                                {
-                                    myEdge.InputComponentGuid = ((Component)method.Tag).ComponentGuid;
-                                    myEdge.OutputComponentGuid = Guid.Empty;
-                                    myEdge.InternalInputComponentGuid = myDockTag.Guid;
-                                    myEdge.InternalOutputComponentGuid = Guid.Empty;
-                                    myEdge.InputValueID = myDockTag.ParamPosition;
-                                    inputHints.Add(myDockTag.DataType);
-                                    myEdge.OutputValueID = (uint)inputHints.Count;
-                                }
-                                else
-                                {
-                                    myEdge.InputComponentGuid = ((Component)method.Tag).ComponentGuid;
-                                    myEdge.OutputComponentGuid = ((Component)((Canvas)myDockTag.OtherDockPoint.Parent).Tag).ComponentGuid;
-                                    myEdge.InternalInputComponentGuid = myDockTag.Guid;
-                                    myEdge.InternalOutputComponentGuid = ((DockTag)myDockTag.OtherDockPoint.Tag).Guid;
-                                    myEdge.InputValueID = myDockTag.ParamPosition;
-                                    myEdge.OutputValueID = ((DockTag)myDockTag.OtherDockPoint.Tag).ParamPosition;
-                                }
+                                myEdge.InputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                myEdge.OutputComponentGuid = Guid.Empty;
+                                myEdge.InternalInputComponentGuid = myDockTag.Guid;
+                                myEdge.InternalOutputComponentGuid = Guid.Empty;
+                                myEdge.InputValueID = myDockTag.ParamPosition;
+                                inputHints.Add(myDockTag.DataType);
+                                myEdge.OutputValueID = (uint)inputHints.Count;
                             }
                             else
                             {
-                                if (myDockTag.OtherDockPoint == null)
-                                {
-                                    myEdge.OutputComponentGuid = ((Component)method.Tag).ComponentGuid;
-                                    myEdge.InputComponentGuid = Guid.Empty;
-                                    myEdge.InternalOutputComponentGuid = myDockTag.Guid;
-                                    myEdge.InternalInputComponentGuid = Guid.Empty;
-                                    myEdge.OutputValueID = myDockTag.ParamPosition;
-                                    outputHints.Add(myDockTag.DataType);
-                                    myEdge.InputValueID = (uint)outputHints.Count;
-                                }
-                                else
-                                {
-                                    myEdge.OutputComponentGuid = ((Component)method.Tag).ComponentGuid;
-                                    myEdge.InputComponentGuid = ((Component)((Canvas)myDockTag.OtherDockPoint.Parent).Tag).ComponentGuid;
-                                    myEdge.InternalOutputComponentGuid = myDockTag.Guid;
-                                    myEdge.InternalInputComponentGuid = ((DockTag)myDockTag.OtherDockPoint.Tag).Guid;
-                                    myEdge.OutputValueID = myDockTag.ParamPosition;
-                                    myEdge.InputValueID = ((DockTag)myDockTag.OtherDockPoint.Tag).ParamPosition;
-                                }
+                                myEdge.InputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                myEdge.OutputComponentGuid = ((Component)((Canvas)myDockTag.OtherDockPoint.Parent).Tag).ComponentGuid;
+                                myEdge.InternalInputComponentGuid = myDockTag.Guid;
+                                myEdge.InternalOutputComponentGuid = ((DockTag)myDockTag.OtherDockPoint.Tag).Guid;
+                                myEdge.InputValueID = myDockTag.ParamPosition;
+                                myEdge.OutputValueID = ((DockTag)myDockTag.OtherDockPoint.Tag).ParamPosition;
                             }
+                        }
+                        else
+                        {
+                            if (myDockTag.OtherDockPoint == null)
+                            {
+                                myEdge.OutputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                myEdge.InputComponentGuid = Guid.Empty;
+                                myEdge.InternalOutputComponentGuid = myDockTag.Guid;
+                                myEdge.InternalInputComponentGuid = Guid.Empty;
+                                myEdge.OutputValueID = myDockTag.ParamPosition;
+                                outputHints.Add(myDockTag.DataType);
+                                myEdge.InputValueID = (uint)outputHints.Count;
+                            }
+                            else
+                            {
+                                myEdge.OutputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                myEdge.InputComponentGuid = ((Component)((Canvas)myDockTag.OtherDockPoint.Parent).Tag).ComponentGuid;
+                                myEdge.InternalOutputComponentGuid = myDockTag.Guid;
+                                myEdge.InternalInputComponentGuid = ((DockTag)myDockTag.OtherDockPoint.Tag).Guid;
+                                myEdge.OutputValueID = myDockTag.ParamPosition;
+                                myEdge.InputValueID = ((DockTag)myDockTag.OtherDockPoint.Tag).ParamPosition;
+                            }
+                        }
 
-                            if (!edges.Any(e => e.InternalInputComponentGuid == myEdge.InternalInputComponentGuid && e.InternalOutputComponentGuid == myEdge.InternalOutputComponentGuid))
+                        if (!edges.Any(e => e.InternalInputComponentGuid == myEdge.InternalInputComponentGuid && e.InternalOutputComponentGuid == myEdge.InternalOutputComponentGuid && e.InputValueID == myEdge.InputValueID && e.OutputValueID == myEdge.OutputValueID))
+                        {
+                        //    //if (myEdge.InternalOutputComponentGuid == Guid.Empty)
+                            //{
+                            var toReplace = edges.FirstOrDefault(l => l.InternalInputComponentGuid == myEdge.InternalInputComponentGuid && l.InputValueID == myEdge.InputValueID || l.InternalOutputComponentGuid == myEdge.InternalOutputComponentGuid && l.OutputValueID == myEdge.OutputValueID);
+
+                            if (toReplace == null)
                             {
                                 edges.Add(myEdge);
                             }
+                            else
+                            {
+                                edges.Remove(toReplace);
+                                edges.Add(myEdge);
+                            }
+                            //}
+                            //else if (myEdge.InternalInputComponentGuid == Guid.Empty)
+                            //{
+                            //toReplace = edges.FirstOrDefault(l => l.InternalOutputComponentGuid == myEdge.InternalOutputComponentGuid && l.OutputValueID == myEdge.OutputValueID);
+
+                            //if (toReplace == null)
+                            //{
+                            //    edges.Add(myEdge);
+                            //}
+                            //else
+                            //{
+                            //    edges.Remove(toReplace);
+                            //    edges.Add(myEdge);
+                            //}
                         }
+                        //else
+                        //{
+                        //    edges.Add(myEdge);
+                        //}
+                    }
+                    //}
                 }
             }
 
