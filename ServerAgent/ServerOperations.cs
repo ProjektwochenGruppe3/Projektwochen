@@ -168,5 +168,19 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             return components;
         }
+
+        internal static bool SaveNewAssembly(byte[] data, Guid componentGuid)
+        {
+            try
+            {
+                string path = Path.Combine(Environment.CurrentDirectory, "Components", componentGuid.ToString() + ".dll");
+                File.WriteAllBytes(path, data);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

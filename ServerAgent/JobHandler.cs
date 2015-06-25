@@ -96,11 +96,20 @@ namespace ServerAgent_PW_Josef_Benda_V1
             // Request all assemblies that are currently not available locally.
             foreach (var item in this.JobParts.Where(x => !this.LocalComponents.Contains(x.Component)))
             {
-                bool requestAccepted = this.Server.ServerHandler.SendAssemblyRequest(item.Component.ComponentGuid);
+                byte[] data = this.Server.ServerHandler.SendAssemblyRequest(item.Component.ComponentGuid);
 
-                if (requestAccepted)
+                if (data == null)
                 {
+                    Console.WriteLine("The requested assembly could not be retrieved from the source server.");
+                    return;
+                }
 
+                bool success = ServerOperations.SaveNewAssembly(data, item.Component.ComponentGuid);
+
+                if (!success)
+                {
+                    Console.WriteLine("The requested assembly could not be saved.");
+                    return;
                 }
             }            
 
