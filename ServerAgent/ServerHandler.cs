@@ -32,6 +32,14 @@ namespace ServerAgent_PW_Josef_Benda_V1
             //this.Timer.Start();
             this.Timer.AutoReset = true;
             this.Timer.Elapsed += this.OnTimerElapsed;
+            this.BroadcastTimer = new System.Timers.Timer(180000);
+            this.BroadcastTimer.AutoReset = true;
+            this.BroadcastTimer.Elapsed += OnBroadcastTimer_Elapsed;
+            //this.BroadcastTimer.Start();
+
+            this.UdpListenerThread = new Thread(new ThreadStart(this.UdpListenerWorker));
+            this.UdpListenerThread.IsBackground = true;
+            this.UdpListenerThread.Start();
         }
 
         public Guid MyGuid { get; set; }
@@ -94,9 +102,13 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         private Thread ListenerThread { get; set; }
 
+        private Thread UdpListenerThread { get; set; }
+
         private Server Server { get; set; }
 
         private System.Timers.Timer Timer { get; set; }
+
+        private System.Timers.Timer BroadcastTimer { get; set; }
 
         private void ListenerWorker()
         {
@@ -115,14 +127,35 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
+        private void UdpListenerWorker()
+        {
+            UdpClient listener = new UdpClient();
+            IPEndPoint ip = new IPEndPoint(IPAddress.Any, 10001);
+            
+            try
+            {
+                
+            }
+            catch
+            {
+
+            }
+        }
+
         private void SendBroadcast()
         {
-            IPEndPoint broadcastAddress = new IPEndPoint(IPAddress.Broadcast, 10001);
-            UdpClient client = new UdpClient(broadcastAddress);
-            client.EnableBroadcast = true;
+            try
+            {
+                IPEndPoint broadcastAddress = new IPEndPoint(IPAddress.Broadcast, 10001);
+                UdpClient client = new UdpClient(broadcastAddress);
+                client.EnableBroadcast = true;
 
-            byte[] pack = Encoding.UTF8.GetBytes("PWSP");
-            client.Send(pack, pack.Length);
+                byte[] pack = Encoding.UTF8.GetBytes("PWSP");
+                client.Send(pack, pack.Length);
+            }
+            catch
+            {
+            }
         }
 
         private void RequestWorker(object serverTcp)
@@ -677,6 +710,11 @@ namespace ServerAgent_PW_Josef_Benda_V1
         private void OnTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             this.SendKeepAlive();
+        }
+
+        private void OnBroadcastTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            this.SendBroadcast();
         }
     }
 }

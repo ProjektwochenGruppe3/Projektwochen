@@ -8,6 +8,7 @@ using System.Threading;
 
 namespace ServerAgent_PW_Josef_Benda_V1
 {
+    [Serializable]
     public class Client
     {
         public Client(TcpClient client, Thread clientThread)

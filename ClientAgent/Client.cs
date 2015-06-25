@@ -15,11 +15,12 @@ namespace ClientAgent
     class Client
     {
 
-        public Client(string ip, int inputPort)
+        public Client(IPAddress ip, int inputPort, string myName)
         {
             this.ipAdress = ip;
             this.port = inputPort;
-            this.MyGuid = new Guid();
+            this.MyGuid = Guid.NewGuid();
+            this.MyName = myName;
             this.Listener = new TcpListener(IPAddress.Any, 47474);
             this.timer = new System.Timers.Timer();
             this.timer.AutoReset = true;
@@ -47,7 +48,7 @@ namespace ClientAgent
 
         private Thread ListenerThread;
 
-        private string ipAdress;
+        private IPAddress ipAdress;
 
         private int port;
 
@@ -97,7 +98,7 @@ namespace ClientAgent
                 {
                     if (netStream == null)
                     {
-                        this.ClientTCP.Connect(IPAddress.Parse(this.ipAdress), this.port);
+                        this.ClientTCP.Connect(this.ipAdress, this.port);
                         netStream = this.ClientTCP.GetStream();
                     }
                     else if (netStream.DataAvailable)
@@ -179,9 +180,17 @@ namespace ClientAgent
                 catch
                 {
                     job.InProgress = false;
-                    handler.DeleteFile(jobDllPath);
                 }
                 Thread.Sleep(50);
+            }
+            try
+            {
+                Console.Clear();
+                handler.DeleteFile(jobDllPath);
+            }
+            catch
+            {
+
             }
         }
 
