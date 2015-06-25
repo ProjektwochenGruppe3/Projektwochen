@@ -22,6 +22,8 @@ namespace ClientAgent
             this.InProgress = true;
         }
 
+        public string path { get; set; }
+
         public bool InProgress { get; set; }
 
         public Guid AtJobGuid { get; private set; }

@@ -36,6 +36,8 @@ namespace ClientAgent
 
         private string MyName;
 
+        private Object locker = new Object();
+
         public Guid MyGuid { get; private set; }
 
         public TcpClient ClientTCP { get; private set; }
@@ -106,7 +108,6 @@ namespace ClientAgent
                         object receivedObj = Networking.RecievePackage(netStream);
                         AgentStatusRequest request = (AgentStatusRequest)receivedObj;
                         this.firstKeepAliveGuid = request.KeepAliveRequestGuid;
-                        this.MyName = request.KeepAliveRequestGuid.ToString() + "_Agent";
                         AgentStatus response = new AgentStatus(request.KeepAliveRequestGuid, this.MyGuid, this.MyName, CPU_Diagnostic.GetCPUusage());
                         Networking.SendPackage(response, netStream);
                         this.Waiting = false;
@@ -143,9 +144,11 @@ namespace ClientAgent
             AtomicJob job = (AtomicJob)atomicJob;
             ExecutableHandler handler = new ExecutableHandler();
             NetworkStream dllStream = job.Server.GetStream();
-            string jobDllPath = Path.Combine(Environment.CurrentDirectory, job.AtJobGuid.ToString() + ".dll");
+            string jobDllPath = Path.Combine(Environment.CurrentDirectory, "DLLs", job.AtJobGuid.ToString() + ".dll");
+            job.path = jobDllPath;
             job.OnExecutableResultsReady += handler.WriteResultToStream;
             bool inExecutableList = false;
+            bool written = false;
             while (job.InProgress)
             {
                 try
@@ -159,8 +162,12 @@ namespace ClientAgent
                         {
                             try
                             {
-                                handler.WriteToFile(jobDllPath, exe.Assembly);
-                                job.ExecutableType = ComponentExecuter.GetTypeFromAssembly(ComponentExecuter.GetAssemblyFromDll(jobDllPath));
+                                while (!written)
+                                {
+                                    handler.WriteToFile(jobDllPath, exe.Assembly);
+                                    job.ExecutableType = ComponentExecuter.GetTypeFromAssembly(ComponentExecuter.GetAssemblyFromDll(jobDllPath));
+                                    written = true;
+                                }
                             }
                             catch (Exception e)
                             {
@@ -169,7 +176,7 @@ namespace ClientAgent
                                 job.FireOnExecutableResultsReady(dllStream);
                             }
                         }
-                        else if (para != null && !inExecutableList)
+                        else if (para != null && !inExecutableList && written)
                         {
                             job.Params = para.Parameters;
                             this.ExecutableJobs.Add(job);
@@ -183,36 +190,41 @@ namespace ClientAgent
                 }
                 Thread.Sleep(50);
             }
-            try
-            {
-                Console.Clear();
-                handler.DeleteFile(jobDllPath);
-            }
-            catch
-            {
-
-            }
         }
 
         public void ExecutionWorker()
         {
             while (true)
             {
+                bool deleted = false;
                 if (this.ExecutableJobs.Count != 0)
                 {
                     try
                     {
-                        this.ExecutableJobs[0].Result = ComponentExecuter.InvokeMethod(this.ExecutableJobs[0]);
-                        this.ExecutableJobs[0].State = Core.Network.JobState.Ok;
-                        this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
-                        this.ExecutableJobs.Remove(this.ExecutableJobs[0]);
+                        try
+                        {
+                            this.ExecutableJobs[0].Result = ComponentExecuter.InvokeMethod(this.ExecutableJobs[0]);
+                            this.ExecutableJobs[0].State = Core.Network.JobState.Ok;
+                            this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
+                            
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("An error occurred while executing the component!");
+                            this.ExecutableJobs[0].State = Core.Network.JobState.Exception;
+                            this.ExecutableJobs[0].Result = new List<string>() { e.Message };
+                            this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
+                        }
+                        deleted = false;
+                        while (!deleted)
+                        {
+                            this.ExecutableJobs.Remove(this.ExecutableJobs[0]);
+                            deleted = true;
+                        }
                     }
                     catch (Exception e)
                     {
-                        this.ExecutableJobs[0].State = Core.Network.JobState.Exception;
-                        this.ExecutableJobs[0].Result = new List<string>() { e.Message };
-                        this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
-                        this.ExecutableJobs.Remove(this.ExecutableJobs[0]);
+                        Console.WriteLine("An error occurred while executing the component!");
                     }
                 }
                 Thread.Sleep(50);
