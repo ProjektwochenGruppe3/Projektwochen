@@ -53,7 +53,7 @@ namespace Editor
 
             EditorGuid = Guid.NewGuid();
 
-            txt_ip.Text = "10.101.100.27";
+            txt_ip.Text = "10.101.150.24";
             txt_port.Text = "30000";
 
             serverComponents = new List<Component>();
