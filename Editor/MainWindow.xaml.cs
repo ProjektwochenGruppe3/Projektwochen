@@ -1075,7 +1075,7 @@ namespace Editor
 
                 if (MyEditorClient != null)
                 {
-                    Thread.Sleep(200);
+                    Thread.Sleep(500);
                     Disconnect_Click(null, null);
                     Connect_Click(null, null);
                 }
