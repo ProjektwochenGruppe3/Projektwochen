@@ -18,6 +18,18 @@ namespace ClientAgent
             string IPinput;
             string portInput;
             int port = 0;
+            string path = Path.Combine(Environment.CurrentDirectory, "DLLs");
+
+            foreach (var item in Directory.GetFiles(path, "*.dll"))
+            {
+                try
+                {
+                    File.Delete(item);
+                }
+                catch
+                {
+                }
+            }
             IPAddress ip = null;
             Console.WriteLine("Please enter a name for the client: ");
             string name = Console.ReadLine();
