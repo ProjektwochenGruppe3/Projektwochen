@@ -182,7 +182,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 else
                 {
                     node.TargetGuids.Add(item.InternalInputComponentGuid);
-                    node.TargetPorts.Add(item.OutputValueID);
+                    node.TargetPorts.Add(item.InputValueID);
                 }
             }
 
