@@ -53,7 +53,7 @@ namespace Editor
 
             EditorGuid = Guid.NewGuid();
 
-            txt_ip.Text = "10.101.150.24";
+            txt_ip.Text = "10.101.100.27";
             txt_port.Text = "30000";
 
             serverComponents = new List<Component>();
@@ -443,7 +443,26 @@ namespace Editor
                 dockHelper.DockLine = null;
                 dockHelper.IsInput = false;
                 dockHelper.OtherDockPoint = null;
-                dockHelper.Guid = internalGuid;
+
+                if (toAdd.IsAtomic == true)
+                {
+                    dockHelper.Guid = internalGuid;
+                }
+                else
+                {
+                    var getGuid = toAdd.Edges.FirstOrDefault(w => w.InputComponentGuid == Guid.Empty && w.InputValueID == i + 1).OutputComponentGuid;
+
+                    if (getGuid == null)
+                    {
+                        dockHelper.Guid = internalGuid;
+                    }
+                    else
+                    {
+                        internalGuid = getGuid;
+                        dockHelper.Guid = internalGuid;
+                    }
+                }
+
                 dockHelper.ParamPosition = (uint)i + 1;
                 dockHelper.DataType = toAdd.OutputHints.ToList()[i].ToString();
                 dockPointOutput.Tag = dockHelper;
@@ -488,7 +507,26 @@ namespace Editor
                 dockHelper.DockLine = null;
                 dockHelper.IsInput = true;
                 dockHelper.OtherDockPoint = null;
-                dockHelper.Guid = internalGuid;
+
+                if (toAdd.IsAtomic == true)
+                {
+                    dockHelper.Guid = internalGuid;
+                }
+                else
+                {
+                    var getGuid = toAdd.Edges.FirstOrDefault(w => w.OutputComponentGuid == Guid.Empty && w.OutputValueID == i + 1).InputComponentGuid;
+
+                    if (getGuid == null)
+                    {
+                        dockHelper.Guid = internalGuid;
+                    }
+                    else
+                    {
+                        internalGuid = getGuid;
+                        dockHelper.Guid = internalGuid;
+                    }
+                }
+
                 dockHelper.ParamPosition = (uint)i + 1;
                 dockHelper.DataType = toAdd.InputHints.ToList()[i].ToString();
                 dockPointInput.Tag = dockHelper;
@@ -1024,7 +1062,7 @@ namespace Editor
                     Thread.Sleep(200);
                     Disconnect_Click(null, null);
                     Connect_Click(null, null);
-                }   
+                }
             }
         }
 
@@ -1240,7 +1278,7 @@ namespace Editor
         {
             foreach (var item in usedComponents)
             {
-                
+
             }
         }
     }
