@@ -129,16 +129,26 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         private void UdpListenerWorker()
         {
+            while (true)
+            {
             UdpClient listener = new UdpClient();
             IPEndPoint ip = new IPEndPoint(IPAddress.Any, 10001);
             
             try
             {
+                byte[] data = listener.Receive(ref ip);
                 
+                if (Encoding.UTF8.GetString(data) == "PWSP")
+                {
+                    this.SendLogonRequest(ip.Address);
+                }
             }
             catch
             {
 
+            }
+
+                Thread.Sleep(42);
             }
         }
 
@@ -216,6 +226,11 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 default:
                     return;
             }
+        }
+
+        private void SendLogonRequest(IPAddress ip)
+        {
+            LogonRequest request = new LogonRequest() { ServerGuid = this.MyGuid, FriendlyName = this.MyFriendlyName, LogonRequestGuid = Guid.NewGuid() };
         }
 
         private void NewServerLogon(string json, IPAddress serverIP)

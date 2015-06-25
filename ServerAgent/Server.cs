@@ -181,6 +181,9 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 if (recieved != null)
                 {
                     client.CpuLoad = recieved.CpuLoad;
+                    client.ClientGuid = recieved.AgentGuid;
+                    client.FriendlyName = recieved.FriendlyName;
+
                     Console.WriteLine("CPU-Load of client {0} is {1}", client.FriendlyName, client.CpuLoad);
                 }
 
