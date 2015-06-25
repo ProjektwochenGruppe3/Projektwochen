@@ -211,7 +211,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     this.RecieveJobRequest(pack.Payload, senderTcp);
                     break;
                 case MessageCode.JobResult:
-
+                    this.RecieveJobResultRequest(pack.Payload, senderTcp);
                     break;
                 case MessageCode.KeepAlive:
                     this.RecieveKeepAlive(pack.Payload, senderTcp);
@@ -224,6 +224,30 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     break;
                 default:
                     return;
+            }
+        }
+
+        private void RecieveJobResultRequest(string json, TcpClient client)
+        {
+            JobResultRequest request = JsonConvert.DeserializeObject<JobResultRequest>(json);
+
+            JobResultResponse response = new JobResultResponse() { JobResultGuid = request.JobResultGuid };
+            string jsonResponse = JsonConvert.SerializeObject(response);
+            ServerPackage package = new ServerPackage(MessageCode.JobResult, jsonResponse);
+
+            // Send response
+            try
+            {
+                NetworkStream ns = client.GetStream();
+
+                Networking.SendServerPackage(package, ns);
+
+                ns.Close();
+                ns.Dispose();
+                client.Close();
+            }
+            catch
+            {
             }
         }
 
@@ -604,13 +628,14 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             bool success = true;
 
-            EditorJob request = JsonConvert.DeserializeObject<EditorJob>(json);
+            JobRequest request = JsonConvert.DeserializeObject<JobRequest>(json);
 
             if (request == null)
             {
                 success = false;
             }
 
+            /*
             request.JobAction = JobAction.Execute;
 
             if (success)
@@ -636,13 +661,14 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     success = false;
                 }
             }
+            */
 
             // Send resonse
             try
             {
                 NetworkStream ns = client.GetStream();
 
-                string jsonresponse = JsonConvert.SerializeObject(new JobResponse() { JobRequestGuid = request.JobRequestGuid, IsAccepted = success });
+                string jsonresponse = JsonConvert.SerializeObject(new JobResponse() { JobRequestGuid = request.JobRequestGuid, IsAccepted = false });
                 ServerPackage package = new ServerPackage(MessageCode.JobRequest, jsonresponse);
 
                 Networking.SendServerPackage(package, ns);
