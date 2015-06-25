@@ -94,7 +94,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
 
             // Request all assemblies that are currently not available locally.
-            foreach (var item in this.JobParts.Where(x => !this.LocalComponents.Contains(x.Component)))
+            foreach (var item in this.JobParts.Where(x => !this.LocalComponents.Any(y => y.ComponentGuid == x.Component.ComponentGuid)))
             {
                 byte[] data = this.Server.ServerHandler.SendAssemblyRequest(item.Component.ComponentGuid);
 
