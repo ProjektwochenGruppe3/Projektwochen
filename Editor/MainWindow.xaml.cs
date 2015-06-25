@@ -53,7 +53,7 @@ namespace Editor
 
             EditorGuid = Guid.NewGuid();
 
-            txt_ip.Text = "10.101.150.24";
+            txt_ip.Text = "10.101.100.27";
             txt_port.Text = "30000";
 
             serverComponents = new List<Component>();
@@ -1106,16 +1106,35 @@ namespace Editor
         private Component Create_Component()
         {
             Component result = new Component();
+
+            if (usedComponents.Count == 1)
+            {
+                result.ComponentGuid = (usedComponents[0].Tag as Component).ComponentGuid;
+            }
+            else
+            {
+                result.ComponentGuid = Guid.NewGuid();
+            }
+
             List<ComponentEdge> edges = new List<ComponentEdge>();
 
             List<string> inputHints = new List<string>();
             List<string> outputHints = new List<string>();
 
-            foreach (var item in canvas.Children)
+            foreach (var method in usedComponents)
             {
-                if (item is Canvas)
-                {
-                    var method = item as Canvas;
+                    var component = method.Tag as Component;
+                    
+                    if (component.IsAtomic == false)
+                    {
+                        foreach (var item3 in component.Edges)
+                        {
+                            if (!edges.Contains(item3))
+                            {
+                                edges.Add(item3);
+                            }
+                        }
+                    }
 
                     foreach (var item2 in method.Children)
                     {
@@ -1175,12 +1194,9 @@ namespace Editor
                                 edges.Add(myEdge);
                             }
                         }
-
-                    }
                 }
             }
 
-            result.ComponentGuid = Guid.NewGuid();
             result.Edges = edges;
             result.InputHints = inputHints;
             result.OutputHints = outputHints;
