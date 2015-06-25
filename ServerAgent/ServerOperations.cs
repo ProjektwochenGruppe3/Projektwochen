@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -60,6 +61,21 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
 
             return null;
+        }
+
+        internal static List<ClientInfo> GetClientInfos(List<Client> clients)
+        {
+            List<ClientInfo> clientinfos = new List<ClientInfo>();
+            foreach (var item in clients)
+            {
+                ClientInfo ci = new ClientInfo();
+                ci.ClientGuid = item.ClientGuid;
+                ci.FriendlyName = item.FriendlyName;
+                ci.IpAddress = ((IPEndPoint)item.ClientTcp.Client.RemoteEndPoint).Address;
+
+                clientinfos.Add(ci);
+            }
+            return clientinfos;
         }
 
         internal static List<Component> GetLocalComponents()

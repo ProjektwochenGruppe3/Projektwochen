@@ -131,22 +131,21 @@ namespace ServerAgent_PW_Josef_Benda_V1
         {
             while (true)
             {
-            UdpClient listener = new UdpClient();
-            IPEndPoint ip = new IPEndPoint(IPAddress.Any, 10001);
-            
-            try
-            {
-                byte[] data = listener.Receive(ref ip);
-                
-                if (Encoding.UTF8.GetString(data) == "PWSP")
-                {
-                    this.SendLogonRequest(ip.Address);
-                }
-            }
-            catch
-            {
+                UdpClient listener = new UdpClient();
+                IPEndPoint ip = new IPEndPoint(IPAddress.Any, 10001);
 
-            }
+                try
+                {
+                    byte[] data = listener.Receive(ref ip);
+
+                    if (Encoding.UTF8.GetString(data) == "PWSP")
+                    {
+                        this.SendLogonRequest(ip.Address);
+                    }
+                }
+                catch
+                {
+                }
 
                 Thread.Sleep(42);
             }
@@ -187,7 +186,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
                         ns.Dispose();
                         newServer.Close();
 
-                        this.HandlePackage(pack, serverIP);
+                        this.HandlePackage(pack, newServer);
                     }
                 }
                 catch
@@ -198,30 +197,30 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
-        private void HandlePackage(ServerPackage pack, IPAddress serverIP)
+        private void HandlePackage(ServerPackage pack, TcpClient senderTcp)
         {
             switch (pack.MessageCode)
             {
                 case MessageCode.ClientUpdate:
-                    this.RecieveClientUpdateRequest(pack.Payload, serverIP);
+                    this.RecieveClientUpdateRequest(pack.Payload, senderTcp);
                     break;
                 case MessageCode.ComponentSubmit:
-                    this.RecieveComponentSubmit(pack.Payload, serverIP);
+                    this.RecieveComponentSubmit(pack.Payload, senderTcp);
                     break;
                 case MessageCode.JobRequest:
-                    this.RecieveJobRequest(pack.Payload, serverIP);
+                    this.RecieveJobRequest(pack.Payload, senderTcp);
                     break;
                 case MessageCode.JobResult:
 
                     break;
                 case MessageCode.KeepAlive:
-                    this.RecieveKeepAlive(pack.Payload, serverIP);
+                    this.RecieveKeepAlive(pack.Payload, senderTcp);
                     break;
                 case MessageCode.Logon:
-                    this.NewServerLogon(pack.Payload, serverIP);
+                    this.NewServerLogon(pack.Payload, senderTcp);
                     break;
                 case MessageCode.RequestAssembly:
-                    this.RecieveAssemblyRequest(pack.Payload, serverIP);
+                    this.RecieveAssemblyRequest(pack.Payload, senderTcp);
                     break;
                 default:
                     return;
@@ -230,12 +229,52 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
         private void SendLogonRequest(IPAddress ip)
         {
-            LogonRequest request = new LogonRequest() { ServerGuid = this.MyGuid, FriendlyName = this.MyFriendlyName, LogonRequestGuid = Guid.NewGuid() };
+            LogonRequest request = new LogonRequest() { ServerGuid = this.MyGuid, FriendlyName = this.MyFriendlyName, LogonRequestGuid = Guid.NewGuid(), AvailableClients = ServerOperations.GetClientInfos(this.Server.Clients.ToList()), AvailableComponents = this.Server.LocalComponents };
+
+            string json = JsonConvert.SerializeObject(request);
+
+            TcpClient client = new TcpClient();
+
+            try
+            {
+                client.Connect(new IPEndPoint(ip, 10000));
+                NetworkStream ns = client.GetStream();
+
+                ServerPackage package = new ServerPackage(MessageCode.Logon, json);
+                Networking.SendServerPackage(package, ns);
+
+                int counter = 0;
+                while (counter < 30000)
+                {
+                    if (ns.DataAvailable)
+                    {
+                        LogonResponse response = JsonConvert.DeserializeObject<LogonResponse>(json);
+                        IPAddress serverIP = ((IPEndPoint)client.Client.RemoteEndPoint).Address;
+
+                        RemoteServer server = new RemoteServer(response.ServerGuid, response.FriendlyName, serverIP, response.AvailableComponents.ToList(), response.AvailableClients.ToList());
+                        this.RemoteServers.Add(server);
+
+                        break;
+                    }
+
+                    counter += 100;
+                    Thread.Sleep(100);
+                }
+
+                ns.Close();
+                ns.Dispose();
+            }
+            catch
+            {
+            }
+
+            client.Close();
         }
 
-        private void NewServerLogon(string json, IPAddress serverIP)
+        private void NewServerLogon(string json, TcpClient client)
         {
             LogonRequest request = JsonConvert.DeserializeObject<LogonRequest>(json);
+            IPAddress serverIP = ((IPEndPoint)client.Client.RemoteEndPoint).Address;
 
             RemoteServer server = new RemoteServer(request.ServerGuid, request.FriendlyName, serverIP, request.AvailableComponents.ToList(), request.AvailableClients.ToList());
             this.RemoteServers.Add(server);
@@ -246,27 +285,15 @@ namespace ServerAgent_PW_Josef_Benda_V1
             response.LogonRequestGuid = request.LogonRequestGuid;
 
             List<Client> clients = this.Server.Clients.ToList();
-            List<ClientInfo> clientinfos = new List<ClientInfo>();
 
-            foreach (var item in clients)
-            {
-                ClientInfo ci = new ClientInfo();
-                ci.ClientGuid = item.ClientGuid;
-                ci.FriendlyName = item.FriendlyName;
-                ci.IpAddress = ((IPEndPoint)item.ClientTcp.Client.RemoteEndPoint).Address;
-
-                clientinfos.Add(ci);
-            }
+            List<ClientInfo> clientinfos = ServerOperations.GetClientInfos(clients);
 
             response.AvailableClients = clientinfos;
             response.AvailableComponents = this.Server.LocalComponents.ToList();
 
             // Send response
-            TcpClient client = new TcpClient();
-
             try
             {
-                client.Connect(new IPEndPoint(serverIP, 10000));
                 NetworkStream ns = client.GetStream();
 
                 string jsonResponse = JsonConvert.SerializeObject(response);
@@ -318,10 +345,11 @@ namespace ServerAgent_PW_Josef_Benda_V1
             //}
         }
 
-        private void RecieveKeepAlive(string json, IPAddress serverIP)
+        private void RecieveKeepAlive(string json, TcpClient client)
         {
             JsonSerializerSettings jss = new JsonSerializerSettings() { MissingMemberHandling = MissingMemberHandling.Error };
             KeepAliveRequest request = null;
+            IPAddress serverIP = ((IPEndPoint)client.Client.RemoteEndPoint).Address;
 
             try
             {
@@ -349,11 +377,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
 
             // Send response
-            TcpClient client = new TcpClient();
-
             try
             {
-                client.Connect(new IPEndPoint(sender.IP, 10000));
                 NetworkStream ns = client.GetStream();
 
                 string jsonresponse = JsonConvert.SerializeObject(new KeepAliveResponse() { KeepAliveRequestGuid = request.KeepAliveRequestGuid });
@@ -385,10 +410,11 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.SendPackageToAllServers(package);
         }
 
-        private void RecieveClientUpdateRequest(string json, IPAddress serverIP)
+        private void RecieveClientUpdateRequest(string json, TcpClient client)
         {
             JsonSerializerSettings jss = new JsonSerializerSettings() { MissingMemberHandling = MissingMemberHandling.Error };
             ClientUpdateRequest request = null;
+            IPAddress serverIP = ((IPEndPoint)client.Client.RemoteEndPoint).Address;
 
             try
             {
@@ -425,11 +451,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
 
             // Send resonse
-            TcpClient client = new TcpClient();
-
             try
             {
-                client.Connect(new IPEndPoint(sender.IP, 10000));
                 NetworkStream ns = client.GetStream();
 
                 string jsonresponse = JsonConvert.SerializeObject(new ClientUpdateResponse() { ClientUpdateRequestGuid = request.ClientUpdateRequestGuid });
@@ -454,10 +477,11 @@ namespace ServerAgent_PW_Josef_Benda_V1
             this.SendPackageToAllServers(package);
         }
 
-        private void RecieveComponentSubmit(string json, IPAddress serverIP)
+        private void RecieveComponentSubmit(string json, TcpClient client)
         {
             JsonSerializerSettings jss = new JsonSerializerSettings() { MissingMemberHandling = MissingMemberHandling.Error };
             ComponentSubmitRequest request = null;
+            IPAddress serverIP = ((IPEndPoint)client.Client.RemoteEndPoint).Address;
 
             try
             {
@@ -481,11 +505,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
 
             // Send resonse
-            TcpClient client = new TcpClient();
-
             try
             {
-                client.Connect(new IPEndPoint(sender.IP, 10000));
                 NetworkStream ns = client.GetStream();
 
                 string jsonresponse = JsonConvert.SerializeObject(new ComponentSubmitResponse() { ComponentSubmitRequestGuid = request.ComponentSubmitRequestGuid, IsAccepted = true });
@@ -561,6 +582,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
                         if (request.JobRequestGuid == jobResp.JobRequestGuid)
                         {
+                            client.Close();
                             return jobResp.IsAccepted;
                         }
                     }
@@ -573,10 +595,12 @@ namespace ServerAgent_PW_Josef_Benda_V1
             {
             }
 
+            client.Close();
+
             return false;
         }
 
-        private void RecieveJobRequest(string json, IPAddress serverIP)
+        private void RecieveJobRequest(string json, TcpClient client)
         {
             bool success = true;
 
@@ -614,11 +638,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
 
             // Send resonse
-            TcpClient client = new TcpClient();
-
             try
             {
-                client.Connect(new IPEndPoint(serverIP, 10000));
                 NetworkStream ns = client.GetStream();
 
                 string jsonresponse = JsonConvert.SerializeObject(new JobResponse() { JobRequestGuid = request.JobRequestGuid, IsAccepted = success });
@@ -635,13 +656,13 @@ namespace ServerAgent_PW_Josef_Benda_V1
             }
         }
 
-        internal bool SendAssemblyRequest(Guid componentID)
+        internal byte[] SendAssemblyRequest(Guid componentID)
         {
             RemoteServer target = this.RemoteServers.FirstOrDefault(x => x.RemoteComponents.Any(y => y.ComponentGuid == componentID));
 
             if (target == null)
             {
-                return false;
+                return null;
             }
 
             AssemblyRequest request = new AssemblyRequest() { AssemblyRequestGuid = Guid.NewGuid(), ComponentGuid = componentID };
@@ -657,29 +678,42 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
                 Networking.SendServerPackage(package, ns);
 
+                int counter = 0;
+                byte[] data = null;
+
+                while (counter < 30000)
+                {
+                    if (ns.DataAvailable)
+                    {
+                        data = Networking.RecieveRemoteAssembly(ns);
+                    }
+                    
+                    counter += 100;
+                    Thread.Sleep(100);
+                }
+
                 ns.Close();
                 ns.Dispose();
                 client.Close();
+
+                return data;
             }
             catch
             {
-                return false;
+                return null;
             }
 
-            return true;
+            return null;
         }
 
-        private void RecieveAssemblyRequest(string json, IPAddress serverIP)
+        private void RecieveAssemblyRequest(string json, TcpClient client)
         {
             AssemblyRequest request = JsonConvert.DeserializeObject<AssemblyRequest>(json);
 
             byte[] data = ServerOperations.GetComponentBytes(request.ComponentGuid);
 
-            TcpClient client = new TcpClient();
-
             try
             {
-                client.Connect(serverIP, 10000);
                 NetworkStream ns = client.GetStream();
 
                 Networking.SendRemoteAssembly(data, ns);
@@ -706,6 +740,8 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
                     Networking.SendServerPackage(package, ns);
 
+                    this.WaitForResponse(ns);
+
                     ns.Close();
                     ns.Dispose();
                     client.Close();
@@ -719,6 +755,24 @@ namespace ServerAgent_PW_Josef_Benda_V1
             foreach (var item in this.RemoteServers.Where(x => !x.Responding))
             {
                 this.RemoteServers.Remove(item);
+            }
+        }
+
+        private void WaitForResponse(NetworkStream ns)
+        {
+            int counter = 0;
+
+            while (counter < 10000)
+            {
+                if (ns.DataAvailable)
+                {
+                    Networking.RecieveServerPackage(ns);
+
+                    // Recieved package will be discarded, because it's only containing a response GUID.
+                }
+
+                counter += 100;
+                Thread.Sleep(100);
             }
         }
 
