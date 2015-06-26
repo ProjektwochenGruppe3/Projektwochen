@@ -53,7 +53,7 @@ namespace Editor
 
             EditorGuid = Guid.NewGuid();
 
-            txt_ip.Text = "10.101.100.27";
+            txt_ip.Text = "127.0.0.1";
             txt_port.Text = "30000";
 
             serverComponents = new List<Component>();
@@ -320,6 +320,7 @@ namespace Editor
             }
 
             canvas.Children.Remove(method);
+            usedComponents.Remove(method);
         }
 
         private void canvas_MouseUp(object sender, MouseButtonEventArgs e)
@@ -1242,6 +1243,12 @@ namespace Editor
                     }
                     //}
                 }
+            }
+
+            if (GraphisValid() == validTypes.componentjob)
+            {
+                edges = edges.Where(l => l.InternalInputComponentGuid != Guid.Empty && l.InternalOutputComponentGuid != Guid.Empty).ToList();
+
             }
 
             result.Edges = edges;
