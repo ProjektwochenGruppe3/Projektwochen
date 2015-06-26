@@ -20,6 +20,10 @@ namespace ClientAgent
             int port = 0;
             string path = Path.Combine(Environment.CurrentDirectory, "DLLs");
 
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
             foreach (var item in Directory.GetFiles(path, "*.dll"))
             {
                 try

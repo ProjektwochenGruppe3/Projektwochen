@@ -9,6 +9,7 @@ using System.Net;
 using System.Timers;
 using dcs.core;
 using System.IO;
+using System.Reflection;
 
 namespace ClientAgent
 {
@@ -174,12 +175,16 @@ namespace ClientAgent
                                 job.State = Core.Network.JobState.Exception;
                                 job.Result = new List<string>() { e.Message };
                                 job.FireOnExecutableResultsReady(dllStream);
+                                job.InProgress = false;
                             }
                         }
                         else if (para != null && !inExecutableList && written)
                         {
                             job.Params = para.Parameters;
-                            this.ExecutableJobs.Add(job);
+                            lock (locker)
+                            {
+                                this.ExecutableJobs.Add(job);
+                            }
                             inExecutableList = true;
                         }
                     }
@@ -199,32 +204,38 @@ namespace ClientAgent
                 bool deleted = false;
                 if (this.ExecutableJobs.Count != 0)
                 {
-                    try
+                    lock (locker)
                     {
                         try
                         {
-                            this.ExecutableJobs[0].Result = ComponentExecuter.InvokeMethod(this.ExecutableJobs[0]);
-                            this.ExecutableJobs[0].State = Core.Network.JobState.Ok;
-                            this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
-                            
+                            try
+                            {
+                                this.ExecutableJobs[0].Result = ComponentExecuter.InvokeMethod(this.ExecutableJobs[0]);
+                                this.ExecutableJobs[0].State = Core.Network.JobState.Ok;
+                                this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
+                                this.ExecutableJobs[0].InProgress = false;
+
+                            }
+                            catch (TargetInvocationException ex)
+                            {
+                                Console.WriteLine("An error occurred while executing the component!" + ex.Message);
+                                this.ExecutableJobs[0].State = Core.Network.JobState.Exception;
+                                this.ExecutableJobs[0].Result = new List<string>() { ex.Message };
+                                this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
+                                this.ExecutableJobs[0].InProgress = false;
+                            }
+                            deleted = false;
+                            while (!deleted)
+                            {
+                                this.ExecutableJobs[0].InProgress = false;
+                                this.ExecutableJobs.Remove(this.ExecutableJobs[0]);
+                                deleted = true;
+                            }
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("An error occurred while executing the component!");
-                            this.ExecutableJobs[0].State = Core.Network.JobState.Exception;
-                            this.ExecutableJobs[0].Result = new List<string>() { e.Message };
-                            this.ExecutableJobs[0].FireOnExecutableResultsReady(this.ExecutableJobs[0].Server.GetStream());
+                            Console.WriteLine("An error occurred while executing the component!" + e.Message);
                         }
-                        deleted = false;
-                        while (!deleted)
-                        {
-                            this.ExecutableJobs.Remove(this.ExecutableJobs[0]);
-                            deleted = true;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("An error occurred while executing the component!");
                     }
                 }
                 Thread.Sleep(50);

@@ -157,7 +157,15 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     node.TargetGuids = new List<Guid>();
                     node.TargetPorts = new List<uint>();
                     node.NodeInputGuids.Add(item.InternalInputComponentGuid);
-                    node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.InputComponentGuid);
+                    try
+                    {
+                        node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.InputComponentGuid);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("An error occurred while splitting the job: " + e.Message);
+                        return;
+                    }
                     node.InputParameters = new List<object>();
                     node.InputParameters.Add(null);
 
@@ -183,7 +191,15 @@ namespace ServerAgent_PW_Josef_Benda_V1
                     node.TargetPorts = new List<uint>();
                     node.TargetPorts.Add(item.InputValueID);
                     node.TargetGuids.Add(item.InternalInputComponentGuid);
-                    node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.OutputComponentGuid);
+                    try
+                    {
+                        node.Component = this.AvailableComponents.First(x => x.ComponentGuid == item.OutputComponentGuid);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("An error occurred while splitting the job: " + e.Message);
+                        return;
+                    }
                     node.InputParameters = new List<object>();
 
                     this.JobParts.Add(node);
@@ -195,13 +211,13 @@ namespace ServerAgent_PW_Josef_Benda_V1
                 }
             }
 
-            foreach (var item in this.JobParts)
-            {
-                if (!item.Component.IsAtomic)
-                {
-                    this.AnalyzeComponent(item.Component);
-                }
-            }
+            //foreach (var item in this.JobParts)
+            //{
+            //    if (!item.Component.IsAtomic)
+            //    {
+            //        this.AnalyzeComponent(item.Component);
+            //    }
+            //}
         }
 
         //public void DebugSendAtomicComponent(JobRequest request, ClientInfo info)
