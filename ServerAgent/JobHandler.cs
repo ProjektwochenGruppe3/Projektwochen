@@ -147,6 +147,10 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             foreach (var item in component.Edges)
             {
+                if (item.InternalOutputComponentGuid == Guid.Empty || item.InternalInputComponentGuid == Guid.Empty)
+                {
+                    continue;
+                }
                 InternalNode node = null;
                 node = this.JobParts.FirstOrDefault(x => x.NodeInputGuids.Contains(item.InternalInputComponentGuid) && item.InternalInputComponentGuid != Guid.Empty);
 
@@ -180,6 +184,10 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             foreach (var item in component.Edges)
             {
+                if (item.InternalOutputComponentGuid == Guid.Empty || item.InternalInputComponentGuid == Guid.Empty)
+                {
+                    continue;
+                }
                 InternalNode node = null;
                 node = this.JobParts.FirstOrDefault(x => x.NodeInputGuids.Contains(item.InternalOutputComponentGuid) && item.InternalOutputComponentGuid != Guid.Empty);
 
@@ -213,7 +221,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             //foreach (var item in this.JobParts)
             //{
-            //    if (!item.Component.IsAtomic)
+            //    if (item.Component.Edges != null)
             //    {
             //        this.AnalyzeComponent(item.Component);
             //    }

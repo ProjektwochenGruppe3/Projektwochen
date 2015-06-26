@@ -39,7 +39,7 @@ namespace ServerAgent_PW_Josef_Benda_V1
 
             this.UdpListenerThread = new Thread(new ThreadStart(this.UdpListenerWorker));
             this.UdpListenerThread.IsBackground = true;
-            this.UdpListenerThread.Start();
+            //this.UdpListenerThread.Start();
         }
 
         public Guid MyGuid { get; set; }

@@ -345,6 +345,44 @@ namespace Editor
 
         private void drawMethod(Component toAdd)
         {
+            if (!toAdd.IsAtomic)
+            {
+                foreach (var item in toAdd.Edges)
+                {
+                    var currentGuid = item.InternalInputComponentGuid;
+
+                    if (currentGuid == Guid.Empty)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        currentGuid = item.InternalOutputComponentGuid;
+
+                        if (currentGuid == Guid.Empty)
+                        {
+                            continue;
+                        }
+                    }
+
+                    var newGuid = Guid.NewGuid();
+
+                    var toChange = toAdd.Edges.Where(l => l.InternalInputComponentGuid == currentGuid);
+
+                    foreach (var item2 in toChange)
+                    {
+                        item2.InternalInputComponentGuid = newGuid;
+                    }
+
+                    toChange = toAdd.Edges.Where(l => l.InternalOutputComponentGuid == currentGuid);
+
+                    foreach (var item2 in toChange)
+                    {
+                        item2.InternalOutputComponentGuid = newGuid;
+                    }
+                }
+            }
+
             Canvas newMethod = new Canvas();
             newMethod.MouseDown += new MouseButtonEventHandler(MouseDownObject);
             canvas.Children.Add(newMethod);
@@ -1165,7 +1203,15 @@ namespace Editor
                         {
                             if (myDockTag.OtherDockPoint == null)
                             {
-                                myEdge.InputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                if (component.IsAtomic)
+                                {
+                                    myEdge.InputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                }
+                                else
+                                {
+                                    myEdge.InputComponentGuid = component.Edges.First(l => l.InternalInputComponentGuid == myDockTag.Guid && l.InputValueID == myDockTag.ParamPosition).InputComponentGuid;
+                                }
+
                                 myEdge.OutputComponentGuid = Guid.Empty;
                                 myEdge.InternalInputComponentGuid = myDockTag.Guid;
                                 myEdge.InternalOutputComponentGuid = Guid.Empty;
@@ -1175,7 +1221,15 @@ namespace Editor
                             }
                             else
                             {
-                                myEdge.InputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                if (component.IsAtomic)
+                                {
+                                    myEdge.InputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                }
+                                else
+                                {
+                                    myEdge.InputComponentGuid = component.Edges.First(l => l.InternalInputComponentGuid == myDockTag.Guid && l.InputValueID == myDockTag.ParamPosition).InputComponentGuid;
+                                }
+
                                 myEdge.OutputComponentGuid = ((Component)((Canvas)myDockTag.OtherDockPoint.Parent).Tag).ComponentGuid;
                                 myEdge.InternalInputComponentGuid = myDockTag.Guid;
                                 myEdge.InternalOutputComponentGuid = ((DockTag)myDockTag.OtherDockPoint.Tag).Guid;
@@ -1187,7 +1241,14 @@ namespace Editor
                         {
                             if (myDockTag.OtherDockPoint == null)
                             {
-                                myEdge.OutputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                if (component.IsAtomic)
+                                {
+                                    myEdge.OutputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                }
+                                else
+                                {
+                                    myEdge.OutputComponentGuid = component.Edges.First(l => l.InternalOutputComponentGuid == myDockTag.Guid && l.OutputValueID == myDockTag.ParamPosition).OutputComponentGuid;
+                                }
                                 myEdge.InputComponentGuid = Guid.Empty;
                                 myEdge.InternalOutputComponentGuid = myDockTag.Guid;
                                 myEdge.InternalInputComponentGuid = Guid.Empty;
@@ -1197,7 +1258,15 @@ namespace Editor
                             }
                             else
                             {
-                                myEdge.OutputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                if (component.IsAtomic)
+                                {
+                                    myEdge.OutputComponentGuid = ((Component)method.Tag).ComponentGuid;
+                                }
+                                else
+                                {
+                                    myEdge.OutputComponentGuid = component.Edges.First(l => l.InternalOutputComponentGuid == myDockTag.Guid && l.OutputValueID == myDockTag.ParamPosition).OutputComponentGuid;
+                                }
+
                                 myEdge.InputComponentGuid = ((Component)((Canvas)myDockTag.OtherDockPoint.Parent).Tag).ComponentGuid;
                                 myEdge.InternalOutputComponentGuid = myDockTag.Guid;
                                 myEdge.InternalInputComponentGuid = ((DockTag)myDockTag.OtherDockPoint.Tag).Guid;
